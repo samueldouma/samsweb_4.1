@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Algorithmic Manipulation & Education Reform - Interactive Mind Map</title>
+  <!-- D3.js from CDN -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    /* Page & Body */
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #000;  /* black background */
+      overflow: hidden;  /* remove scrollbars */
+      font-family: sans-serif;
+      color: #fff;
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: absolute;
+      background: #222;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+      pointer-events: none;
+      line-height: 1.4em;
+      opacity: 0;
+      transition: opacity 0.2s;
+      max-width: 250px;
+    }
+
+    /* Links between nodes */
+    .link {
+      stroke: #ccc;
+      stroke-opacity: 0.7;
+      stroke-width: 1.5px;
+    }
+
+    /* Node group */
+    .node circle {
+      stroke: #000;
+      stroke-width: 2px;
+      cursor: grab;
+    }
+    /* Larger node for main topics, smaller for subtopics */
+    /* We'll set the radius dynamically in the code */
+    
+    /* Node label text (white on dark circle) */
+    .node text {
+      fill: #fff;
+      pointer-events: none;
+      text-anchor: middle;
+      font-size: 14px;
+      font-weight: 400;
+    }
+
+    /* Hover highlight on circle */
+    .node circle:hover {
+      stroke: #fff;
+      stroke-width: 2.5px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="tooltip" class="tooltip"></div>
+
+<script>
+/* 
+   1) Hierarchical data for the mind map:
+      - name: node title
+      - definition: paragraph displayed in tooltip on hover
+      - children: subtopics
+*/
+const data = {
+  name: "Algorithmic Manipulation & Education Reform",
+  definition: "Root node representing the overall topic.",
+  children: [
+    {
+      name: "Algorithmic Manipulation",
+      definition: "Strategies to influence or steer recommendation feeds.",
+      children: [
+        {
+          name: "Creating new Accounts",
+          definition: "Using fresh profiles to avoid existing personalization history."
+        },
+        {
+          name: "Interaction Patterns",
+          definition: "Methodically liking/skipping content to shape algorithmic responses."
+        },
+        {
+          name: "Data Collection",
+          definition: "Recording recommended videos, watch times, etc. for analysis."
+        },
+        {
+          name: "Behavior Adjustment",
+          definition: "Tweaking watch/skip habits to achieve desired content diversity."
+        }
+      ]
+    },
+    {
+      name: "Diversity Factor (ΔF)",
+      definition: "Shannon-entropy-based measure of how balanced your 'info diet' is.",
+      children: [
+        {
+          name: "Shannon Entropy",
+          definition: "Quantifies unpredictability or diversity of a given distribution."
+        },
+        {
+          name: "Content Balancing",
+          definition: "Keeping watch time equally distributed across multiple categories."
+        },
+        {
+          name: "Entropy Metrics",
+          definition: "Statistical tools to track distribution shifts in recommended content."
+        },
+        {
+          name: "Weighted Sources",
+          definition: "Factoring in source quality or reliability into your diversification plan."
+        }
+      ]
+    },
+    {
+      name: "Legal & Social Arguments",
+      definition: "Justifications for user control over digital recommendation ecosystems.",
+      children: [
+        {
+          name: "Free Speech",
+          definition: "Right to receive broad information, not just narrow or biased feeds."
+        },
+        {
+          name: "Education Rights",
+          definition: "Universal right to education extends to ensuring diverse digital content."
+        },
+        {
+          name: "Consumer Protections",
+          definition: "Legal frameworks preventing deceptive, unfair recommendation practices."
+        },
+        {
+          name: "Societal Benefits",
+          definition: "Fostering critical thinking, mental health, democratic discourse."
+        },
+        {
+          name: "Digital Literacy",
+          definition: "Empowering individuals to understand and navigate AI-driven platforms."
+        }
+      ]
+    },
+    {
+      name: "Education & Policy Reform",
+      definition: "Proposed structural or regulatory changes for more open, balanced algorithms.",
+      children: [
+        {
+          name: "Curriculum Settings",
+          definition: "Modes or features that ensure educational vs. purely entertaining content."
+        },
+        {
+          name: "Algorithm Transparency",
+          definition: "Platforms disclosing how content is ranked, letting users adjust parameters."
+        },
+        {
+          name: "Data Portability",
+          definition: "User ability to export preference profiles or watch history to other services."
+        },
+        {
+          name: "Oversight Bodies",
+          definition: "Independent organizations ensuring compliance with fairness and diversity."
+        },
+        {
+          name: "Public Interest",
+          definition: "Balancing corporate profit motives with broader social and educational needs."
+        }
+      ]
+    }
+  ]
+};
+
+/*
+   2) Flatten hierarchical data into arrays for force layout (nodes + links).
+*/
+function flatten(root) {
+  const nodes = [];
+  const links = [];
+
+  function recurse(current, parent = null) {
+    nodes.push(current);
+    if (parent) {
+      links.push({ source: parent, target: current });
+    }
+    if (current.children) {
+      current.children.forEach(child => recurse(child, current));
+    }
+  }
+  recurse(root);
+  return { nodes, links };
+}
+
+const { nodes, links } = flatten(data);
+
+/*
+   3) Setup the SVG with a zoomable container <g>.
+*/
+const width = window.innerWidth;
+const height = window.innerHeight;
+
+const svg = d3.select("body")
+  .append("svg")
+  .attr("width", width)
+  .attr("height", height);
+
+// Container for zoom/pan
+const container = svg.append("g");
+
+// Zoom behavior
+const zoom = d3.zoom()
+  .scaleExtent([0.5, 4]) // adjust min & max zoom
+  .on("zoom", (event) => {
+    container.attr("transform", event.transform);
+  });
+svg.call(zoom);
+
+// Tooltip reference
+const tooltip = d3.select("#tooltip");
+
+/*
+   4) Force simulation setup.
+*/
+const simulation = d3.forceSimulation(nodes)
+  .force("link", d3.forceLink(links).distance(130).strength(1))
+  .force("charge", d3.forceManyBody().strength(-500))
+  .force("center", d3.forceCenter(width / 2, height / 2))
+  .on("tick", ticked);
+
+/*
+   5) Draw links & nodes inside container group.
+*/
+const link = container.selectAll(".link")
+  .data(links)
+  .enter().append("line")
+  .attr("class", "link");
+
+const node = container.selectAll(".node")
+  .data(nodes)
+  .enter().append("g")
+  .attr("class", "node")
+  .call(d3.drag()
+    .on("start", dragstarted)
+    .on("drag", dragged)
+    .on("end", dragended)
+  );
+
+/* 
+   5.1) Node circles:
+   - Larger radius if node has children (main topic)
+   - Medium gray fill for main nodes, slightly darker for subtopics 
+*/
+node.append("circle")
+  .attr("r", d => (d.children ? 30 : 18))
+  .attr("fill", d => (d.children ? "#777" : "#555"));
+
+/*
+   5.2) Node text (title):
+   Show the full node name in white, center it.
+*/
+node.append("text")
+  .attr("dy", "0.35em")
+  .text(d => d.name)
+  .style("font-size", d => (d.children ? "16px" : "14px"))
+  .attr("text-anchor", "middle");
+
+/*
+   6) Hover logic (tooltip).
+*/
+node
+  .on("mouseover", (event, d) => {
+    tooltip
+      .style("opacity", 1)
+      .html(`
+        <strong>${d.name}</strong><br/>
+        ${d.definition || "No definition provided."}
+      `)
+      .style("left", (event.pageX + 10) + "px")
+      .style("top", (event.pageY + 10) + "px");
+  })
+  .on("mousemove", (event) => {
+    tooltip
+      .style("left", (event.pageX + 10) + "px")
+      .style("top", (event.pageY + 10) + "px");
+  })
+  .on("mouseout", () => {
+    tooltip.style("opacity", 0);
+  });
+
+/*
+   7) Each tick update positions of links & nodes.
+*/
+function ticked() {
+  link
+    .attr("x1", d => d.source.x)
+    .attr("y1", d => d.source.y)
+    .attr("x2", d => d.target.x)
+    .attr("y2", d => d.target.y);
+
+  node
+    .attr("transform", d => `translate(${d.x},${d.y})`);
+}
+
+/*
+   8) Drag event handlers.
+*/
+function dragstarted(event, d) {
+  if (!event.active) simulation.alphaTarget(0.3).restart();
+  d.fx = d.x;
+  d.fy = d.y;
+}
+function dragged(event, d) {
+  d.fx = event.x;
+  d.fy = event.y;
+}
+function dragended(event, d) {
+  if (!event.active) simulation.alphaTarget(0);
+  d.fx = null;
+  d.fy = null;
+}
+</script>
+</body>
+</html>
