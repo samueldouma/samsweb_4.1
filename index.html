@@ -1,22 +1,122 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Samuel Douma - Interactive Directory</title>
-  <link rel="stylesheet" href="style.css">
-  <!-- Matter.js from CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
-</head>
-<body class="homepage">
-  <canvas id="canvas"></canvas>
-  <div id="overlay">
-    <h1>Samuel Douma</h1>
-    <div id="subnav">
-      <a href="cv.html">CV</a>
-      <a href="contact.html">Contact</a>
-      <a href="about.html">About</a>
-    </div>
-  </div>
-  <script src="script.js"></script>
-</body>
-</html>
+// Module aliases from Matter.js
+const { Engine, Render, Runner, Bodies, Composite, Mouse, MouseConstraint, Events, Query } = Matter;
+
+// Create engine and renderer
+const engine = Engine.create();
+const canvas = document.getElementById("canvas");
+const render = Render.create({
+  canvas: canvas,
+  engine: engine,
+  options: {
+    width: window.innerWidth,
+    height: window.innerHeight,
+    background: "#fff", // White background
+    wireframes: false,
+    pixelRatio: window.devicePixelRatio
+  }
+});
+
+// Create boundaries
+function createBoundaries() {
+  const thickness = 50;
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const boundaries = [
+    Bodies.rectangle(width / 2, -thickness / 2, width, thickness, { isStatic: true }),
+    Bodies.rectangle(width / 2, height + thickness / 2, width, thickness, { isStatic: true }),
+    Bodies.rectangle(-thickness / 2, height / 2, thickness, height, { isStatic: true }),
+    Bodies.rectangle(width + thickness / 2, height / 2, thickness, height, { isStatic: true })
+  ];
+  Composite.add(engine.world, boundaries);
+}
+createBoundaries();
+
+// Function to generate a random color
+function getRandomColor() {
+  return `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`;
+}
+
+// Retrieve stored colors from sessionStorage
+const storedColors = JSON.parse(sessionStorage.getItem("clickedBallColors") || "{}");
+
+// Directory buttons (bouncing circles) with labels and page links
+const directories = [
+  { label: "Audio", link: "audio.html" },
+  { label: "Video", link: "video.html" },
+  { label: "Disco", link: "disco.html" },
+  { label: "Dico", link: "dico.html" },
+  { label: "Cogito", link: "cogito.html" },
+  { label: "Lego", link: "lego.html" },
+  { label: "Scribo", link: "scribo.html" }
+];
+
+const circles = [];
+const circleRadius = 80;
+
+directories.forEach((dir, index) => {
+  const color = storedColors[dir.label] || "#fff"; // Default white if not clicked
+  const circle = Bodies.circle(
+    Math.random() * (window.innerWidth - 2 * circleRadius) + circleRadius,
+    Math.random() * (window.innerHeight - 2 * circleRadius) + circleRadius,
+    circleRadius,
+    {
+      restitution: 0.9,
+      friction: 0.005,
+      render: { fillStyle: color, strokeStyle: "#000", lineWidth: 2 }
+    }
+  );
+  circle.directory = dir;
+  circle.index = index; // Store index for lookup
+  circles.push(circle);
+});
+Composite.add(engine.world, circles);
+
+// Add mouse control for dragging
+const mouse = Mouse.create(render.canvas);
+const mouseConstraint = MouseConstraint.create(engine, {
+  mouse: mouse,
+  constraint: { stiffness: 0.2, render: { visible: false } }
+});
+Composite.add(engine.world, mouseConstraint);
+render.mouse = mouse;
+
+// On canvas click, check for a clicked circle, navigate, and update color
+render.canvas.addEventListener("click", () => {
+  const mousePos = mouse.position;
+  for (let circle of circles) {
+    const dx = mousePos.x - circle.position.x;
+    const dy = mousePos.y - circle.position.y;
+    if (Math.sqrt(dx * dx + dy * dy) <= circleRadius) {
+      // Change the color permanently for the session
+      const newColor = getRandomColor();
+      circle.render.fillStyle = newColor;
+      storedColors[circle.directory.label] = newColor;
+      sessionStorage.setItem("clickedBallColors", JSON.stringify(storedColors));
+
+      // Navigate to the linked page
+      window.location.href = circle.directory.link;
+      break;
+    }
+  }
+});
+
+// Draw labels on the circles
+Events.on(render, "afterRender", () => {
+  const context = render.context;
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.font = "20px 'Helvetica Neue'";
+  context.lineWidth = 1;
+  context.strokeStyle = "#000";
+  circles.forEach((circle) => {
+    context.strokeText(circle.directory.label, circle.position.x, circle.position.y);
+  });
+});
+
+Render.run(render);
+Runner.run(Runner.create(), engine);
+
+window.addEventListener("resize", () => {
+  render.canvas.width = window.innerWidth;
+  render.canvas.height = window.innerHeight;
+});
