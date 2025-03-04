@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pupillometry Tone Generator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap');
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Playfair Display', serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            background-color: black;
+            color: white;
+        }
+
+        #videoContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #videoElement {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        #pupilOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        #startButton {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: white;
+            color: black;
+            font-size: 18px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            z-index: 3;
+        }
+
+        h1 {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 36px;
+            z-index: 3;
+        }
+    </style>
+</head>
+<body>
+    <div id="videoContainer">
+        <video id="videoElement" autoplay></video>
+        <canvas id="pupilOverlay"></canvas>
+    </div>
+    <h1>Pupillometry Tone Generator</h1>
+    <button id="startButton">Stop</button>
+
+    <script>
+        let video = document.querySelector("#videoElement");
+        let pupilOverlay = document.querySelector("#pupilOverlay");
+        let startButton = document.querySelector("#startButton");
+        let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let oscillator = null;
+        let isRunning = true;
+
+        const scale = [220, 247, 294, 330, 392, 440, 494, 587, 659, 784]; // Frequencies for A3, B3, D4, E4, G4, A4, B4, D5, E5, G5
+
+        function brightnessToFrequency(brightness) {
+            let index = Math.floor((1 - brightness) * (scale.length - 1));
+            return scale[index];
+        }
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+                video.srcObject = stream;
+            })
+            .catch(function(err) {
+                console.log("An error occurred: " + err);
+            });
+
+        function startAnalysis() {
+            if (!oscillator) {
+                oscillator = audioContext.createOscillator();
+                oscillator.connect(audioContext.destination);
+                oscillator.start();
+            }
+
+            function analyze() {
+                if (!isRunning) return;
+
+                let canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                let ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                // Simulating eye zoom by cropping the center of the video feed
+                let croppedWidth = canvas.width * 0.3;
+                let croppedHeight = canvas.height * 0.3;
+                let croppedX = (canvas.width - croppedWidth) / 2;
+                let croppedY = (canvas.height - croppedHeight) / 2;
+
+                let croppedCanvas = document.createElement('canvas');
+                croppedCanvas.width = croppedWidth;
+                croppedCanvas.height = croppedHeight;
+                let croppedCtx = croppedCanvas.getContext('2d');
+                croppedCtx.drawImage(canvas, croppedX, croppedY, croppedWidth, croppedHeight, 0, 0, croppedWidth, croppedHeight);
+
+                let imageData = croppedCtx.getImageData(0, 0, croppedWidth, croppedHeight);
+                let brightness = calculateBrightness(imageData.data);
+
+                let frequency = brightnessToFrequency(brightness);
+                oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+
+                // Drawing the pupil recognition overlay
+                let overlayCtx = pupilOverlay.getContext('2d');
+                overlayCtx.clearRect(0, 0, pupilOverlay.width, pupilOverlay.height);
+                overlayCtx.strokeStyle = "lime";
+                overlayCtx.lineWidth = 5;
+                overlayCtx.strokeRect(croppedX, croppedY, croppedWidth, croppedHeight);
+
+                requestAnimationFrame(analyze);
+            }
+
+            analyze();
+        }
+
+        function calculateBrightness(data) {
+            let r, g, b, avg;
+            let colorSum = 0;
+            for(let x = 0, len = data.length; x < len; x += 4) {
+                r = data[x];
+                g = data[x+1];
+                b = data[x+2];
+
+                avg = Math.floor((r + g + b) / 3);
+                colorSum += avg;
+            }
+            return colorSum / (data.length / 4) / 255;
+        }
+
+        startButton.addEventListener("click", function() {
+            isRunning = !isRunning;
+            if (!isRunning) {
+                if (oscillator) {
+                    oscillator.stop();
+                    oscillator = null;
+                }
+                this.textContent = "Start";
+            } else {
+                startAnalysis();
+                this.textContent = "Stop";
+            }
+        });
+
+        // Start the analysis immediately
+        startAnalysis();
+    </script>
+</body>
+</html>
