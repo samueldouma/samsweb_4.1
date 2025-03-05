@@ -100,6 +100,37 @@ render.canvas.addEventListener("click", () => {
   }
 });
 
+// Touch event handling for mobile navigation
+render.canvas.addEventListener('touchstart', (event) => {
+  event.preventDefault();
+  const touch = event.touches[0];
+  const mousePos = {
+    x: touch.clientX,
+    y: touch.clientY
+  };
+  
+  for (let circle of circles) {
+    const dx = mousePos.x - circle.position.x;
+    const dy = mousePos.y - circle.position.y;
+    if (Math.sqrt(dx * dx + dy * dy) <= circleRadius) {
+      // Change the color permanently for the session
+      const newColor = getRandomColor();
+      circle.render.fillStyle = newColor;
+      storedColors[circle.directory.label] = newColor;
+      sessionStorage.setItem("clickedBallColors", JSON.stringify(storedColors));
+
+      // Navigate to the linked page
+      window.location.href = circle.directory.link;
+      break;
+    }
+  }
+}, { passive: false });
+
+// Prevent default touch behaviors that might interfere with Matter.js
+document.body.addEventListener('touchmove', (event) => {
+  event.preventDefault();
+}, { passive: false });
+
 // Draw labels on the circles
 Events.on(render, "afterRender", () => {
   const context = render.context;
