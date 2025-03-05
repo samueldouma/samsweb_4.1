@@ -7,6 +7,9 @@
     <style>
         * {
             user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
             text-transform: uppercase;
             transition: color 0.2s ease;
         }
@@ -15,24 +18,13 @@
             background: #000;
             color: #fff;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             min-height: 100vh;
             margin: 0;
             font-family: Arial, sans-serif;
             overflow: hidden;
-        }
-
-        .warning-box {
-            text-align: center;
-            font-size: 14px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px 15px;
-            border: 1px solid currentColor;
-            max-width: 500px;
-            margin-bottom: 20px;
-            letter-spacing: 1px;
+            transition: background-color 0.2s ease;
         }
 
         .player-container {
@@ -42,7 +34,7 @@
             padding: 20px;
             width: 100%;
             max-width: 1000px;
-            margin-left: -100px;
+            margin-left: -100px; /* Shift left */
         }
 
         .main-content {
@@ -51,7 +43,7 @@
 
         .speed-controls {
             width: 160px;
-            padding-top: 80px;
+            padding-top: 80px; /* Align with visualizer */
         }
 
         .audio-container {
@@ -64,6 +56,7 @@
             position: relative;
             width: 100%;
             height: 400px;
+            margin: 10px 0;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -95,6 +88,7 @@
             align-items: center;
             justify-content: center;
             font-size: 20px;
+            padding: 0;
             transition: all 0.2s ease;
         }
 
@@ -160,11 +154,6 @@
     </style>
 </head>
 <body>
-
-    <div class="warning-box">
-        WORKS BEST ON DESKTOP. ADD AN AUDIO FILE (PREFERABLY .WAV OR .M4A) AND CHANGE THE SPEED OF IT VIA SCROLLING ON THE POTENTIOMETER KNOB. WHILE YOU DO THIS, REMARK ON THE QUALITY AND CHARACTER OF THE SPECTRAL IMAGING.
-    </div>
-
     <div class="player-container">
         <div class="main-content">
             <input type="file" id="audioFile" accept="audio/*">
@@ -190,5 +179,207 @@
         <audio id="audioPlayer" style="display: none;"></audio>
     </div>
 
+    <script>
+        const audioPlayer = document.getElementById('audioPlayer');
+        const audioFile = document.getElementById('audioFile');
+        const speedKnob = document.getElementById('speedKnob');
+        const speedIndicator = speedKnob.querySelector('.speed-indicator');
+        const speedValue = document.getElementById('speedValue');
+        const fileName = document.getElementById('fileName');
+        const playButton = document.getElementById('playButton');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const waveformCanvas = document.getElementById('waveformVisualizer');
+        const spectrogramCanvas = document.getElementById('spectrogramVisualizer');
+        
+        let audioContext;
+        let analyser;
+        let source;
+        let isDragging = false;
+        let rotationValue = 0;
+        let lastY = 0;
+        let waveformAnimationId;
+        let spectrogramAnimationId;
+
+        function initAudioContext() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 2048;
+            source = audioContext.createMediaElementSource(audioPlayer);
+            source.connect(analyser);
+            analyser.connect(audioContext.destination);
+        }
+
+        function calculateSpeed(rotation) {
+            const absRotation = Math.abs(rotation);
+            const direction = rotation >= 0 ? 1 : -1;
+            const speed = Math.pow(2, absRotation / 30);
+            return direction === 1 ? speed : 1 / speed;
+        }
+
+        function updateBackgroundBrightness(speed) {
+            const logSpeed = Math.log2(Math.abs(speed));
+            const brightness = Math.min(100, Math.max(0, (logSpeed + 8) * 6));
+            document.body.style.backgroundColor = `rgb(${brightness}%, ${brightness}%, ${brightness}%)`;
+            document.body.style.color = brightness > 50 ? '#000' : '#fff';
+        }
+
+        function drawWaveform() {
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            const ctx = waveformCanvas.getContext('2d');
+
+            function animate() {
+                waveformAnimationId = requestAnimationFrame(animate);
+                analyser.getByteTimeDomainData(dataArray);
+
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                ctx.fillRect(0, 0, waveformCanvas.width, waveformCanvas.height);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#fff'; // Always white
+                ctx.beginPath();
+
+                const sliceWidth = waveformCanvas.width / bufferLength;
+                let x = 0;
+
+                for (let i = 0; i < bufferLength; i++) {
+                    const v = dataArray[i] / 128.0;
+                    const y = v * waveformCanvas.height / 2;
+
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+
+                    x += sliceWidth;
+                }
+
+                ctx.lineTo(waveformCanvas.width, waveformCanvas.height / 2);
+                ctx.stroke();
+            }
+
+            animate();
+        }
+
+        function drawSpectrogram() {
+            const ctx = spectrogramCanvas.getContext('2d');
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            function animate() {
+                spectrogramAnimationId = requestAnimationFrame(animate);
+                analyser.getByteFrequencyData(dataArray);
+
+                ctx.drawImage(spectrogramCanvas, 
+                    1, 0, 
+                    spectrogramCanvas.width - 1, spectrogramCanvas.height,
+                    0, 0, 
+                    spectrogramCanvas.width - 1, spectrogramCanvas.height
+                );
+
+                for (let i = 0; i < spectrogramCanvas.height; i++) {
+                    const index = Math.floor(i * bufferLength / spectrogramCanvas.height);
+                    const value = dataArray[index];
+                    ctx.fillStyle = `rgb(${value}, ${value}, ${value})`;
+                    ctx.fillRect(spectrogramCanvas.width - 1, spectrogramCanvas.height - i, 1, 1);
+                }
+            }
+
+            animate();
+        }
+
+        function updatePlayer(rotation) {
+            const speed = calculateSpeed(rotation);
+            const visualRotation = rotation % 360;
+            
+            speedIndicator.style.transform = `translateX(-50%) rotate(${visualRotation}deg)`;
+            
+            const displaySpeed = Math.abs(speed);
+            if (isFinite(displaySpeed)) {
+                speedValue.textContent = displaySpeed.toFixed(2) + 'X';
+                audioPlayer.playbackRate = displaySpeed;
+                updateBackgroundBrightness(displaySpeed);
+            }
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Event Listeners
+        audioFile.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const audioUrl = URL.createObjectURL(file);
+            
+            if (!audioContext) {
+                initAudioContext();
+            }
+            
+            audioPlayer.src = audioUrl;
+            fileName.textContent = file.name.toUpperCase();
+            
+            if (waveformAnimationId) cancelAnimationFrame(waveformAnimationId);
+            if (spectrogramAnimationId) cancelAnimationFrame(spectrogramAnimationId);
+            
+            // Reset canvas sizes
+            waveformCanvas.width = waveformCanvas.offsetWidth;
+            waveformCanvas.height = waveformCanvas.offsetHeight;
+            spectrogramCanvas.width = spectrogramCanvas.offsetWidth;
+            spectrogramCanvas.height = spectrogramCanvas.offsetHeight;
+            
+            drawWaveform();
+            drawSpectrogram();
+        });
+
+        playButton.addEventListener('click', () => {
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+                playButton.textContent = '❚❚';
+            } else {
+                audioPlayer.pause();
+                playButton.textContent = '▶';
+            }
+        });
+
+        audioPlayer.addEventListener('timeupdate', () => {
+            const current = formatTime(audioPlayer.currentTime);
+            const total = formatTime(audioPlayer.duration || 0);
+            timeDisplay.textContent = `${current} / ${total}`;
+        });
+
+        document.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            rotationValue += e.deltaY * -0.1;
+            updatePlayer(rotationValue);
+        }, { passive: false });
+
+        speedKnob.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            lastY = e.clientY;
+            speedKnob.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            const deltaY = e.clientY - lastY;
+            rotationValue -= deltaY;
+            lastY = e.clientY;
+            updatePlayer(rotationValue);
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+            speedKnob.style.cursor = 'pointer';
+        });
+
+        // Initialize
+        updatePlayer(0);
+    </script>
 </body>
 </html>
