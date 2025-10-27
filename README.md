@@ -1,5 +1,5 @@
 Hello! I'm Sam Douma. I'm an interdisciplinary project-based artist and author who plays with unique forms of independent publishing. 
-Here is my personal website which I co-coded (with significant assistence from coding agents such as _Claude_, _ChatGPT_, and _Cursor_,
+Here is my personal website which I co-coded (with significant coding help from _Claude_, _ChatGPT_, and _Cursor_,
 with additional assets from other open sourced libraries and tutorials).
 
 The website is organized by a number of different categories, printed on interactive buttons via latin titles which are the following:
