@@ -10,24 +10,30 @@ const render = Render.create({
   options: {
     width: window.innerWidth,
     height: window.innerHeight,
-    background: "#ffffff", // white background
+    background: "#ffffff",
     wireframes: false
   }
 });
 
 Matter.Render.setPixelRatio(render, Math.max(1, window.devicePixelRatio || 1));
 
-// === Helper function for random pastel colors ===
-function randomPastel() {
-  const hue = Math.floor(Math.random() * 360);
-  const saturation = 60 + Math.random() * 25; // ~60–85%
-  const lightness = 70 + Math.random() * 10;  // ~70–80%
-  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-}
+// === Color palette (same as original project aesthetic) ===
+// These stay consistent — each corresponds to a directory index
+const colorPalette = [
+  "#E3C9FF", // lavender
+  "#FFD6A5", // peach
+  "#C4FAF8", // mint
+  "#B9FBC0", // soft green
+  "#A0C4FF", // light blue
+  "#FFADAD", // pink-red
+  "#FDFFB6"  // yellow
+];
+
+// Load visited state
+const visited = JSON.parse(localStorage.getItem("visitedBubbles") || "[]");
 
 // === Boundaries ===
 let boundaryBodies = [];
-
 function addBoundaries() {
   const t = 50;
   const w = window.innerWidth;
@@ -40,12 +46,10 @@ function addBoundaries() {
   ];
   Composite.add(engine.world, boundaryBodies);
 }
-
 function removeBoundaries() {
   boundaryBodies.forEach(b => Composite.remove(engine.world, b));
   boundaryBodies = [];
 }
-
 addBoundaries();
 
 // === Invisible Blocker Under Text ===
@@ -64,17 +68,15 @@ function addCenterBlocker() {
   });
   Composite.add(engine.world, centerBody);
 }
-
 function removeCenterBlocker() {
   if (centerBody) {
     Composite.remove(engine.world, centerBody);
     centerBody = null;
   }
 }
-
 addCenterBlocker();
 
-// === Directories (the floating circles) ===
+// === Directories (floating circles) ===
 const directories = [
   { label: "Audio", link: "audio.html" },
   { label: "Video", link: "video.html" },
@@ -90,7 +92,10 @@ const baseRadius = 60;
 const minSide = Math.min(window.innerWidth, window.innerHeight);
 const circleRadius = Math.round(Math.max(44, Math.min(baseRadius, minSide * 0.08)));
 
-directories.forEach(dir => {
+directories.forEach((dir, i) => {
+  const isVisited = visited.includes(dir.label);
+  const fillColor = isVisited ? colorPalette[i % colorPalette.length] : "#ffffff";
+
   const circle = Bodies.circle(
     Math.random() * (window.innerWidth - 2 * circleRadius) + circleRadius,
     Math.random() * (window.innerHeight - 2 * circleRadius) + circleRadius,
@@ -99,7 +104,7 @@ directories.forEach(dir => {
       restitution: 0.9,
       friction: 0.005,
       render: {
-        fillStyle: randomPastel(),
+        fillStyle: fillColor,
         strokeStyle: "#000000",
         lineWidth: 2
       }
@@ -108,7 +113,6 @@ directories.forEach(dir => {
   circle.directory = dir;
   circles.push(circle);
 });
-
 Composite.add(engine.world, circles);
 
 // === Mouse + Touch ===
@@ -120,18 +124,27 @@ const mouseConstraint = MouseConstraint.create(engine, {
 Composite.add(engine.world, mouseConstraint);
 render.mouse = mouse;
 
+// === Click / Tap navigation + mark visited ===
 function handleActivate() {
   const mousePos = mouse.position;
   for (let circle of circles) {
     const dx = mousePos.x - circle.position.x;
     const dy = mousePos.y - circle.position.y;
     if (Math.hypot(dx, dy) <= circleRadius) {
+      const label = circle.directory.label;
+
+      // Save to visited state
+      if (!visited.includes(label)) {
+        visited.push(label);
+        localStorage.setItem("visitedBubbles", JSON.stringify(visited));
+      }
+
+      // Navigate to page
       window.location.href = circle.directory.link;
       return;
     }
   }
 }
-
 render.canvas.addEventListener("click", handleActivate, { passive: true });
 render.canvas.addEventListener("pointerup", handleActivate, { passive: true });
 
