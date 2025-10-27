@@ -48,8 +48,7 @@ try {
 // Returning to this page -> flag present -> show colored visited bubbles.
 const enableVisitedColors = sessionStorage.getItem(COLOR_FLAG) === "1";
 
-/* ---------------------- Strong primary color palette ------------------- */
-/* Evenly spaced, fully saturated around the spectrum */
+/* ---------------------- Colors (indexed palette) ------------------- */
 const colorPalette = [
   "#FF0000", // Red
   "#FF7F00", // Orange
