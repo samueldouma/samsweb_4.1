@@ -10,15 +10,39 @@ const render = Render.create({
   options: {
     width: window.innerWidth,
     height: window.innerHeight,
-    background: "#ffffff",
+    background: "#ffffff", // keep homepage white
     wireframes: false
   }
 });
 
 Matter.Render.setPixelRatio(render, Math.max(1, window.devicePixelRatio || 1));
 
-// === Color palette (same as original project aesthetic) ===
-// These stay consistent — each corresponds to a directory index
+// === Visited memory & first-load handling ===
+const VISITED_KEY = "visitedBubbles_v2";
+const SESSION_KEY = "splashSessionInit_v1";
+
+// optional manual reset: add ?reset=1 to URL
+try {
+  const url = new URL(window.location.href);
+  if (url.searchParams.get("reset") === "1") {
+    localStorage.removeItem(VISITED_KEY);
+  }
+} catch (_) {}
+
+let visited = [];
+try {
+  const raw = localStorage.getItem(VISITED_KEY);
+  visited = raw ? JSON.parse(raw) : [];
+  if (!Array.isArray(visited)) visited = [];
+} catch (_) {
+  visited = [];
+}
+
+// Important: On the **first load of a new tab/window**, we IGNORE the visited colors.
+// After the first paint, we mark the session as initialized so subsequent returns show colors.
+const ignoreVisitedThisSession = !sessionStorage.getItem(SESSION_KEY);
+
+// === Color palette (indexed by directory order) ===
 const colorPalette = [
   "#E3C9FF", // lavender
   "#FFD6A5", // peach
@@ -28,9 +52,6 @@ const colorPalette = [
   "#FFADAD", // pink-red
   "#FDFFB6"  // yellow
 ];
-
-// Load visited state
-const visited = JSON.parse(localStorage.getItem("visitedBubbles") || "[]");
 
 // === Boundaries ===
 let boundaryBodies = [];
@@ -78,12 +99,12 @@ addCenterBlocker();
 
 // === Directories (floating circles) ===
 const directories = [
-  { label: "Audio", link: "audio.html" },
-  { label: "Video", link: "video.html" },
-  { label: "Disco", link: "disco.html" },
-  { label: "Dico", link: "dico.html" },
+  { label: "Audio",  link: "audio.html"  },
+  { label: "Video",  link: "video.html"  },
+  { label: "Disco",  link: "disco.html"  },
+  { label: "Dico",   link: "dico.html"   },
   { label: "Cogito", link: "cogito.html" },
-  { label: "Lego", link: "lego.html" },
+  { label: "Lego",   link: "lego.html"   },
   { label: "Scribo", link: "scribo.html" }
 ];
 
@@ -93,7 +114,7 @@ const minSide = Math.min(window.innerWidth, window.innerHeight);
 const circleRadius = Math.round(Math.max(44, Math.min(baseRadius, minSide * 0.08)));
 
 directories.forEach((dir, i) => {
-  const isVisited = visited.includes(dir.label);
+  const isVisited = !ignoreVisitedThisSession && visited.includes(dir.label);
   const fillColor = isVisited ? colorPalette[i % colorPalette.length] : "#ffffff";
 
   const circle = Bodies.circle(
@@ -124,7 +145,7 @@ const mouseConstraint = MouseConstraint.create(engine, {
 Composite.add(engine.world, mouseConstraint);
 render.mouse = mouse;
 
-// === Click / Tap navigation + mark visited ===
+// Click / Tap navigation + mark visited
 function handleActivate() {
   const mousePos = mouse.position;
   for (let circle of circles) {
@@ -133,13 +154,18 @@ function handleActivate() {
     if (Math.hypot(dx, dy) <= circleRadius) {
       const label = circle.directory.label;
 
-      // Save to visited state
+      // Mark visited in localStorage
       if (!visited.includes(label)) {
         visited.push(label);
-        localStorage.setItem("visitedBubbles", JSON.stringify(visited));
+        try {
+          localStorage.setItem(VISITED_KEY, JSON.stringify(visited));
+        } catch (_) {}
       }
 
-      // Navigate to page
+      // Mark session as initialized (so colors will show on return this session)
+      sessionStorage.setItem(SESSION_KEY, "1");
+
+      // Navigate
       window.location.href = circle.directory.link;
       return;
     }
@@ -185,3 +211,6 @@ function resize() {
 window.addEventListener("resize", resize);
 window.addEventListener("orientationchange", resize);
 resize();
+
+// After initial paint, mark session so subsequent returns show visited colors
+sessionStorage.setItem(SESSION_KEY, "1");
