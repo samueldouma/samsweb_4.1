@@ -10,12 +10,20 @@ const render = Render.create({
   options: {
     width: window.innerWidth,
     height: window.innerHeight,
-    background: "#ffffff",
+    background: "#ffffff", // white background
     wireframes: false
   }
 });
 
 Matter.Render.setPixelRatio(render, Math.max(1, window.devicePixelRatio || 1));
+
+// === Helper function for random pastel colors ===
+function randomPastel() {
+  const hue = Math.floor(Math.random() * 360);
+  const saturation = 60 + Math.random() * 25; // ~60–85%
+  const lightness = 70 + Math.random() * 10;  // ~70–80%
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+}
 
 // === Boundaries ===
 let boundaryBodies = [];
@@ -91,7 +99,7 @@ directories.forEach(dir => {
       restitution: 0.9,
       friction: 0.005,
       render: {
-        fillStyle: "#ffffff",
+        fillStyle: randomPastel(),
         strokeStyle: "#000000",
         lineWidth: 2
       }
