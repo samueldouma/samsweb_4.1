@@ -7,19 +7,24 @@
   box-sizing: border-box;
 }
 html, body {
-  font-family: "Helvetica Neue", sans-serif;
+  font-family: "Helvetica Neue", Arial, sans-serif;
 }
 
 /* 2) Homepage (index.html) styling */
 body.homepage {
   background-color: #fff;  /* White background */
-  color: #000;            /* Black text */
-  overflow: hidden;       /* Because we use a full-screen canvas for Matter.js */
+  color: #000;             /* Black text */
+  overflow: hidden;        /* We use a full-screen canvas for Matter.js */
 }
 
 /* The canvas on homepage */
 canvas {
   display: block;
+  width: 100vw;             /* ensure canvas fills screen width */
+  height: 100vh;            /* ensure canvas fills screen height */
+  touch-action: none;       /* allow drag gestures without scrolling */
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* Overlay for homepage's central title & subnav */
@@ -29,22 +34,39 @@ canvas {
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
-  pointer-events: none; /* Let clicks pass through to the canvas */
+  pointer-events: none; /* Let clicks pass through except the links below */
+  padding: 0 16px;      /* breathing room on small phones */
 }
+
 #overlay h1 {
-  font-size: 60px;
+  /* Responsive title: scales between 28px and 60px */
+  font-size: clamp(28px, 8vw, 60px);
+  line-height: 1.1;
   margin: 0;
   color: #000;
 }
+
+/* Subnav links */
 #subnav {
   margin-top: 10px;
 }
 #subnav a {
   margin: 0 10px;
-  font-size: 20px;
+  font-size: clamp(16px, 3.8vw, 20px);
   color: #000;
   text-decoration: none;
   pointer-events: auto; /* enable clicking on these links */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;       /* Apple HIG tap target size */
+  min-height: 44px;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+#subnav a:active {
+  outline: 2px solid #000;
+  outline-offset: 2px;
 }
 
 /* 3) Subpages styling (all category pages + project pages) */
