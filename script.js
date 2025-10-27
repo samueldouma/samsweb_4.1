@@ -10,22 +10,26 @@ const render = Render.create({
   options: {
     width: window.innerWidth,
     height: window.innerHeight,
-    background: "#ffffff", // keep homepage white
+    background: "#ffffff", // white homepage
     wireframes: false
   }
 });
 
+// crisp on mobile without scaling the world
 Matter.Render.setPixelRatio(render, Math.max(1, window.devicePixelRatio || 1));
 
-// === Visited memory & first-load handling ===
+/* ------------------------------------------------------------------ *
+ * Visited memory + explicit "only color AFTER a click" session flag
+ * ------------------------------------------------------------------ */
 const VISITED_KEY = "visitedBubbles_v2";
-const SESSION_KEY = "splashSessionInit_v1";
+const COLOR_FLAG  = "enableVisitedColors_v1"; // set to "1" only when user clicks a bubble
 
-// optional manual reset: add ?reset=1 to URL
+// Optional nukes via URL: ?reset=1 clears everything
 try {
-  const url = new URL(window.location.href);
-  if (url.searchParams.get("reset") === "1") {
+  const u = new URL(window.location.href);
+  if (u.searchParams.get("reset") === "1") {
     localStorage.removeItem(VISITED_KEY);
+    sessionStorage.removeItem(COLOR_FLAG);
   }
 } catch (_) {}
 
@@ -38,11 +42,13 @@ try {
   visited = [];
 }
 
-// Important: On the **first load of a new tab/window**, we IGNORE the visited colors.
-// After the first paint, we mark the session as initialized so subsequent returns show colors.
-const ignoreVisitedThisSession = !sessionStorage.getItem(SESSION_KEY);
+// IMPORTANT: We DO NOT show colors unless this session flag is set.
+// First load -> flag not set -> all bubbles white.
+// After user clicks a bubble (before navigation) -> we set the flag.
+// Returning to this page -> flag present -> show colored visited bubbles.
+const enableVisitedColors = sessionStorage.getItem(COLOR_FLAG) === "1";
 
-// === Color palette (indexed by directory order) ===
+/* ---------------------- Colors (indexed palette) ------------------- */
 const colorPalette = [
   "#E3C9FF", // lavender
   "#FFD6A5", // peach
@@ -53,7 +59,7 @@ const colorPalette = [
   "#FDFFB6"  // yellow
 ];
 
-// === Boundaries ===
+/* --------------------------- Boundaries ---------------------------- */
 let boundaryBodies = [];
 function addBoundaries() {
   const t = 50;
@@ -73,15 +79,15 @@ function removeBoundaries() {
 }
 addBoundaries();
 
-// === Invisible Blocker Under Text ===
+/* --------------- Invisible blocker behind title/subnav ------------- */
 let centerBody = null;
 function addCenterBlocker() {
   const w = window.innerWidth;
   const h = window.innerHeight;
   const centerX = w / 2;
   const centerY = h / 2;
-  const centerWidth = Math.min(420, Math.max(240, w * 0.56));
-  const centerHeight = Math.min(140, Math.max(80, h * 0.16));
+  const centerWidth  = Math.min(420, Math.max(240, w * 0.56));
+  const centerHeight = Math.min(140, Math.max(80,  h * 0.16));
 
   centerBody = Bodies.rectangle(centerX, centerY, centerWidth, centerHeight, {
     isStatic: true,
@@ -97,7 +103,7 @@ function removeCenterBlocker() {
 }
 addCenterBlocker();
 
-// === Directories (floating circles) ===
+/* -------------------- Directories (bubbles) ------------------------ */
 const directories = [
   { label: "Audio",  link: "audio.html"  },
   { label: "Video",  link: "video.html"  },
@@ -114,8 +120,9 @@ const minSide = Math.min(window.innerWidth, window.innerHeight);
 const circleRadius = Math.round(Math.max(44, Math.min(baseRadius, minSide * 0.08)));
 
 directories.forEach((dir, i) => {
-  const isVisited = !ignoreVisitedThisSession && visited.includes(dir.label);
-  const fillColor = isVisited ? colorPalette[i % colorPalette.length] : "#ffffff";
+  // Only show color if this session was "enabled" by a user click
+  const showColor = enableVisitedColors && visited.includes(dir.label);
+  const fillColor = showColor ? colorPalette[i % colorPalette.length] : "#ffffff";
 
   const circle = Bodies.circle(
     Math.random() * (window.innerWidth - 2 * circleRadius) + circleRadius,
@@ -136,7 +143,7 @@ directories.forEach((dir, i) => {
 });
 Composite.add(engine.world, circles);
 
-// === Mouse + Touch ===
+/* -------------------- Mouse / Touch controls ----------------------- */
 const mouse = Mouse.create(render.canvas);
 const mouseConstraint = MouseConstraint.create(engine, {
   mouse,
@@ -145,7 +152,7 @@ const mouseConstraint = MouseConstraint.create(engine, {
 Composite.add(engine.world, mouseConstraint);
 render.mouse = mouse;
 
-// Click / Tap navigation + mark visited
+// Click / Tap navigation + mark visited + enable color for future returns
 function handleActivate() {
   const mousePos = mouse.position;
   for (let circle of circles) {
@@ -154,16 +161,14 @@ function handleActivate() {
     if (Math.hypot(dx, dy) <= circleRadius) {
       const label = circle.directory.label;
 
-      // Mark visited in localStorage
+      // Persist visited
       if (!visited.includes(label)) {
         visited.push(label);
-        try {
-          localStorage.setItem(VISITED_KEY, JSON.stringify(visited));
-        } catch (_) {}
+        try { localStorage.setItem(VISITED_KEY, JSON.stringify(visited)); } catch (_) {}
       }
 
-      // Mark session as initialized (so colors will show on return this session)
-      sessionStorage.setItem(SESSION_KEY, "1");
+      // Enable coloring on future loads in THIS session
+      sessionStorage.setItem(COLOR_FLAG, "1");
 
       // Navigate
       window.location.href = circle.directory.link;
@@ -174,7 +179,7 @@ function handleActivate() {
 render.canvas.addEventListener("click", handleActivate, { passive: true });
 render.canvas.addEventListener("pointerup", handleActivate, { passive: true });
 
-// === Draw Labels ===
+/* -------------------------- Labels ------------------------------- */
 Events.on(render, "afterRender", () => {
   const ctx = render.context;
   ctx.textAlign = "center";
@@ -186,11 +191,11 @@ Events.on(render, "afterRender", () => {
   });
 });
 
-// === Run Simulation ===
+/* --------------------------- Run -------------------------------- */
 Render.run(render);
 Runner.run(Runner.create(), engine);
 
-// === Resize Logic ===
+/* -------------------------- Resize ------------------------------- */
 function resize() {
   const w = window.innerWidth;
   const h = window.innerHeight;
@@ -211,6 +216,3 @@ function resize() {
 window.addEventListener("resize", resize);
 window.addEventListener("orientationchange", resize);
 resize();
-
-// After initial paint, mark session so subsequent returns show visited colors
-sessionStorage.setItem(SESSION_KEY, "1");
