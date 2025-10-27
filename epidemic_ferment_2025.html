@@ -57,11 +57,19 @@
       color: #777;
     }
 
-    .image-frame img {
-      display: block;
-      max-width: 100%;
-      margin: 20px auto;
-      border-radius: 4px;
+    iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+      border-radius: 6px;
+      margin-top: 20px;
+      background-color: #111;
+    }
+
+    @media (max-width: 700px) {
+      iframe {
+        height: 400px;
+      }
     }
   </style>
 </head>
@@ -81,13 +89,16 @@
     </p>
 
     <div class="image-frame">
-      <p>[ Image spreads and related material will go here ]</p>
+      <p>Preview of the print publication:</p>
 
-      <!-- Example placeholder — replace with your real images later -->
-      <!--
-      <img src="assets/epidemic-ferment-2025/spread-01.jpg" alt="Spread 1">
-      <img src="assets/epidemic-ferment-2025/spread-02.jpg" alt="Spread 2">
-      -->
+      <!-- Embedded PDF viewer -->
+      <iframe src="assets/epidemic-ferment-2025/epidemicfermentthumbnail.pdf"></iframe>
+
+      <p style="margin-top: 10px;">
+        <a href="assets/epidemic-ferment-2025/epidemicfermentthumbnail.pdf" target="_blank" style="color: white; text-decoration: underline;">
+          Open full PDF in new tab
+        </a>
+      </p>
     </div>
   </main>
 </body>
