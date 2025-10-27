@@ -15,7 +15,7 @@ const render = Render.create({
   }
 });
 
-// Crisp on mobile without scaling the world
+// crisp on mobile without scaling the world
 Matter.Render.setPixelRatio(render, Math.max(1, window.devicePixelRatio || 1));
 
 /* ------------------------------------------------------------------ *
@@ -24,7 +24,7 @@ Matter.Render.setPixelRatio(render, Math.max(1, window.devicePixelRatio || 1));
 const VISITED_KEY = "visitedBubbles_v2";
 const COLOR_FLAG  = "enableVisitedColors_v1"; // set to "1" only when user clicks a bubble
 
-// Optional reset: open /index.html?reset=1
+// Optional nukes via URL: ?reset=1 clears everything
 try {
   const u = new URL(window.location.href);
   if (u.searchParams.get("reset") === "1") {
@@ -44,20 +44,21 @@ try {
 
 // IMPORTANT: We DO NOT show colors unless this session flag is set.
 // First load -> flag not set -> all bubbles white.
-// After a click (before navigation) -> we set the flag.
+// After user clicks a bubble (before navigation) -> we set the flag.
 // Returning to this page -> flag present -> show colored visited bubbles.
 const enableVisitedColors = sessionStorage.getItem(COLOR_FLAG) === "1";
 
-/* ---------------------- Evenly spaced 7-color palette -------------- *
- * Evenly divide the hue circle (0–360°) into 7 parts:
- * 0°, ~51°, ~103°, ~154°, ~206°, ~257°, ~309°  (red→violet)
- * Pastel-ish: S=70%, L=70% keeps labels readable with black text.
- */
-const NUM_COLORS = 7;
-const palette = Array.from({ length: NUM_COLORS }, (_, i) => {
-  const hue = Math.round((360 / NUM_COLORS) * i);
-  return `hsl(${hue}, 70%, 70%)`;
-});
+/* ---------------------- Strong primary color palette ------------------- */
+/* Evenly spaced, fully saturated around the spectrum */
+const colorPalette = [
+  "#FF0000", // Red
+  "#FF7F00", // Orange
+  "#FFFF00", // Yellow
+  "#00FF00", // Green
+  "#0000FF", // Blue
+  "#4B0082", // Indigo
+  "#8B00FF"  // Violet
+];
 
 /* --------------------------- Boundaries ---------------------------- */
 let boundaryBodies = [];
@@ -122,7 +123,7 @@ const circleRadius = Math.round(Math.max(44, Math.min(baseRadius, minSide * 0.08
 directories.forEach((dir, i) => {
   // Only show color if this session was "enabled" by a user click
   const showColor = enableVisitedColors && visited.includes(dir.label);
-  const fillColor = showColor ? palette[i % NUM_COLORS] : "#ffffff";
+  const fillColor = showColor ? colorPalette[i % colorPalette.length] : "#ffffff";
 
   const circle = Bodies.circle(
     Math.random() * (window.innerWidth - 2 * circleRadius) + circleRadius,
