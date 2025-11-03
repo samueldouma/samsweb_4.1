@@ -1,75 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Epidemic Ferment 2025</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
   <style>
+    :root {
+      --page-padding: 40px;
+      --max-text: 800px;
+      --bg: #000;
+      --fg: #fff;
+      --muted: #777;
+      --frame: #333;
+    }
+
+    /* Base */
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
     body {
-      background-color: black;
-      color: white;
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
       font-family: Helvetica, Arial, sans-serif;
-      margin: 40px;
       line-height: 1.6;
     }
 
+    header, main { padding: var(--page-padding); }
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 40px;
     }
 
-    h1 {
-      font-size: 1.8em;
-      margin: 0;
-    }
+    h1 { margin: 0; font-size: 1.8em; }
 
     a.back-button {
-      color: white;
+      color: var(--fg);
       text-decoration: none;
-      border: 1px solid white;
+      border: 1px solid var(--fg);
       padding: 6px 12px;
       border-radius: 4px;
       transition: 0.2s;
     }
+    a.back-button:hover { background: var(--fg); color: var(--bg); }
 
-    a.back-button:hover {
-      background-color: white;
-      color: black;
-    }
+    main { max-width: var(--max-text); margin: 0 auto; }
+    p { margin-bottom: 20px; }
 
-    main {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    p {
-      margin-bottom: 20px;
-    }
-
-    .image-frame {
-      margin-top: 40px;
-      border: 1px solid #333;
-      border-radius: 6px;
-      padding: 20px;
-      text-align: center;
-      color: #777;
-    }
-
-    iframe {
+    /* Fullscreen cover image section (no internal scroll) */
+    .hero {
       width: 100%;
-      height: 600px;
+      height: 100vh;            /* full viewport height */
+      display: grid;
+      place-items: center;
+      padding: 0;
+      overflow: hidden;         /* prevent any internal scroll */
+      border-top: 1px solid var(--frame);
+      border-bottom: 1px solid var(--frame);
+    }
+    .hero img {
+      max-width: 100vw;
+      max-height: 100vh;
+      object-fit: contain;      /* fit nicely without cropping */
+      display: block;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    /* PDF embed (links remain clickable) */
+    .pdf-wrap {
+      width: 100%;
+      padding: var(--page-padding);
+      border-top: 1px solid var(--frame);
+    }
+    .pdf-frame {
+      width: 100%;
+      height: 100vh;            /* full-screen height area */
       border: none;
+      background: #111;
       border-radius: 6px;
-      margin-top: 20px;
-      background-color: #111;
+      display: block;
     }
 
     @media (max-width: 700px) {
-      iframe {
-        height: 400px;
-      }
+      header, main, .pdf-wrap { padding: 20px; }
+      .pdf-frame { height: 90vh; } /* a little shorter on small screens */
     }
   </style>
 </head>
@@ -87,19 +102,22 @@
     <p>
       Printed as a magazine and accompanied by an evolving digital archive, <strong>Epidemic Ferment</strong> functions as both a study and a provocation: a documentation of the brain-rot age and a gesture toward fermentation—toward synthesis, renewal, and mindful participation in the informational ecosystem. What follows is some associated material as well as the means to acquire a copy of it yourself.
     </p>
-
-    <div class="image-frame">
-      <p>Preview of the print publication:</p>
-
-      <!-- Embedded PDF viewer -->
-      <iframe src="assets/epidemic-ferment-2025/epidemicfermentthumbnail.pdf"></iframe>
-
-      <p style="margin-top: 10px;">
-        <a href="assets/epidemic-ferment-2025/epidemicfermentthumbnail.pdf" target="_blank" style="color: white; text-decoration: underline;">
-          Open full PDF in new tab
-        </a>
-      </p>
-    </div>
   </main>
+
+  <!-- Fullscreen, non-scrollable cover image -->
+  <section class="hero" aria-label="Cover">
+    <!-- Update the src to your actual JPG path if different -->
+    <img src="assets/epidemic-ferment-2025/epidemicfermentthumbnail.jpg" alt="Epidemic Ferment 2025 Cover" />
+  </section>
+
+  <!-- Full-width embedded PDF with clickable hyperlinks -->
+  <section class="pdf-wrap" aria-label="ROTLIOGRAPHY PDF">
+    <!-- If your file lives elsewhere, replace the src with your exact GitHub raw URL or relative path -->
+    <embed
+      class="pdf-frame"
+      src="https://raw.githubusercontent.com/samueldouma/samsweb_4.1/main/ROTLIOGRAPHY.pdf#view=FitH&toolbar=1"
+      type="application/pdf"
+    />
+  </section>
 </body>
 </html>
