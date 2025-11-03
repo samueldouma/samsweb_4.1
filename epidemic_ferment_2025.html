@@ -14,25 +14,32 @@
       --frame: #333;
     }
 
-    /* Base */
     * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
+
+    html, body {
       margin: 0;
+      padding: 0;
+      height: 100%;
       background: var(--bg);
       color: var(--fg);
       font-family: Helvetica, Arial, sans-serif;
       line-height: 1.6;
     }
 
-    header, main { padding: var(--page-padding); }
+    header, main {
+      padding: var(--page-padding);
+    }
+
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    h1 { margin: 0; font-size: 1.8em; }
+    h1 {
+      margin: 0;
+      font-size: 1.8em;
+    }
 
     a.back-button {
       color: var(--fg);
@@ -42,40 +49,53 @@
       border-radius: 4px;
       transition: 0.2s;
     }
-    a.back-button:hover { background: var(--fg); color: var(--bg); }
 
-    main { max-width: var(--max-text); margin: 0 auto; }
-    p { margin-bottom: 20px; }
+    a.back-button:hover {
+      background: var(--fg);
+      color: var(--bg);
+    }
 
-    /* Fullscreen cover image section (no internal scroll) */
-    .hero {
+    main {
+      max-width: var(--max-text);
+      margin: 0 auto;
+    }
+
+    p {
+      margin-bottom: 20px;
+    }
+
+    /* Cover image section */
+    .cover-section {
       width: 100%;
-      height: 100vh;            /* full viewport height */
-      display: grid;
-      place-items: center;
-      padding: 0;
-      overflow: hidden;         /* prevent any internal scroll */
+      margin-top: 40px;
+      text-align: center;
       border-top: 1px solid var(--frame);
       border-bottom: 1px solid var(--frame);
+      background: #000;
+      padding: 0;
     }
-    .hero img {
-      max-width: 100vw;
-      max-height: 100vh;
-      object-fit: contain;      /* fit nicely without cropping */
+
+    .cover-section img {
       display: block;
+      width: 100%;
+      height: auto;
+      max-height: 100vh;
+      object-fit: contain;
+      border: none;
       user-select: none;
       -webkit-user-drag: none;
     }
 
-    /* PDF embed (links remain clickable) */
-    .pdf-wrap {
+    /* PDF embed section */
+    .pdf-section {
       width: 100%;
       padding: var(--page-padding);
       border-top: 1px solid var(--frame);
     }
+
     .pdf-frame {
       width: 100%;
-      height: 100vh;            /* full-screen height area */
+      height: 100vh;
       border: none;
       background: #111;
       border-radius: 6px;
@@ -83,8 +103,12 @@
     }
 
     @media (max-width: 700px) {
-      header, main, .pdf-wrap { padding: 20px; }
-      .pdf-frame { height: 90vh; } /* a little shorter on small screens */
+      header, main, .pdf-section {
+        padding: 20px;
+      }
+      .pdf-frame {
+        height: 90vh;
+      }
     }
   </style>
 </head>
@@ -104,15 +128,13 @@
     </p>
   </main>
 
-  <!-- Fullscreen, non-scrollable cover image -->
-  <section class="hero" aria-label="Cover">
-    <!-- Update the src to your actual JPG path if different -->
-    <img src="assets/epidemic-ferment-2025/epidemicfermentthumbnail.jpg" alt="Epidemic Ferment 2025 Cover" />
+  <!-- Full-width cover image -->
+  <section class="cover-section">
+    <img src="assets/epidemic-ferment-2025/epidemicfermentthumbnail.jpg" alt="Epidemic Ferment 2025 Cover">
   </section>
 
-  <!-- Full-width embedded PDF with clickable hyperlinks -->
-  <section class="pdf-wrap" aria-label="ROTLIOGRAPHY PDF">
-    <!-- If your file lives elsewhere, replace the src with your exact GitHub raw URL or relative path -->
+  <!-- Full-width embedded PDF -->
+  <section class="pdf-section">
     <embed
       class="pdf-frame"
       src="https://raw.githubusercontent.com/samueldouma/samsweb_4.1/main/ROTLIOGRAPHY.pdf#view=FitH&toolbar=1"
