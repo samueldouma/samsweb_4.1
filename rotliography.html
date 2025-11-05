@@ -5,46 +5,32 @@
   <title>Epidemic Ferment ROTLIOGRAPHY 2025</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root {
-      --bg: #000;
-      --fg: #fff;
-      --panel: #111;
-    }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
+    :root { --bg:#000; --fg:#fff; --panel:#111; }
+    * { box-sizing:border-box; }
+    html, body { height:100%; }
     body {
-      margin: 0;
-      padding: 16px;
-      background: var(--bg);
-      color: var(--fg);
-      font-family: Helvetica, Arial, sans-serif;
-      line-height: 1.6;
+      margin:0; padding:16px; background:var(--bg); color:var(--fg);
+      font-family: Helvetica, Arial, sans-serif; line-height:1.6;
     }
-    header { margin: 0 0 16px 0; }
-    h1 { margin: 0; font-size: 1.25rem; font-weight: 600; }
-    main { max-width: 1200px; margin: 0 auto; }
-
-    /* Responsive viewer wrapper */
+    header { margin:0 0 12px 0; }
+    h1 { margin:0; font-size:1.2rem; font-weight:600; }
+    main { max-width:1200px; margin:0 auto; }
     .viewer-wrap {
-      width: 100%;
-      background: var(--panel);
-      border: 1px solid #222;
-      border-radius: 8px;
-      overflow: hidden;
+      width:100%; background:var(--panel); border:1px solid #222;
+      border-radius:8px; overflow:hidden;
     }
-    /* Desktop/tablet: fill viewport height */
-    .viewer {
-      display: block;
-      width: 100%;
-      height: 100vh;
-      border: 0;
+    iframe.viewer {
+      display:block; width:100%; height:100vh; border:0; background:#222;
     }
-    /* Mobile: avoid browser UI overlap with dynamic viewport units */
     @media (max-width: 700px) {
-      body { padding: 12px; }
-      h1 { font-size: 1.05rem; }
-      .viewer { height: 90dvh; }
+      body { padding:12px; }
+      h1 { font-size:1.05rem; }
+      iframe.viewer { height:90dvh; }
     }
+    .note {
+      margin-top:10px; font-size:.9rem; color:#bbb;
+    }
+    .note a { color:#fff; }
   </style>
 </head>
 <body>
@@ -53,35 +39,19 @@
   </header>
 
   <main>
-    <!-- Uses PDF.js official viewer inside an iframe.
-         This renders ON-PAGE on desktop AND mobile with working in-PDF links. -->
     <section class="viewer-wrap">
+      <!-- Google Docs Viewer renders PDFs reliably inline on iOS/Android/desktop -->
       <iframe
-        id="pdfFrame"
         class="viewer"
-        title="ROTLIOGRAPHY PDF Viewer"
-        allow="clipboard-read; clipboard-write"
-        referrerpolicy="no-referrer"
-      ></iframe>
+        title="ROTLIOGRAPHY PDF"
+        src="https://docs.google.com/gview?embedded=1&url=https%3A%2F%2Fsamueldouma.github.io%2Fsamsweb_4.1%2FROTLIOGRAPHY.pdf">
+      </iframe>
     </section>
+
+    <!-- Optional: direct link for opening in the system viewer -->
+    <p class="note">
+      If needed, <a href="https://samueldouma.github.io/samsweb_4.1/ROTLIOGRAPHY.pdf" target="_blank" rel="noopener">open the PDF directly</a>.
+    </p>
   </main>
-
-  <script>
-    // Your raw PDF URL:
-    const pdfUrl = "https://raw.githubusercontent.com/samueldouma/samsweb_4.1/main/ROTLIOGRAPHY.pdf";
-
-    // Use Mozilla's generic PDF.js viewer (renders PDFs with working links on mobile/desktop)
-    // and pass your file as a URL param. Avoids mobile Safari's <embed>/<object> issues.
-    const viewerBase = "https://mozilla.github.io/pdf.js/web/viewer.html";
-    const params = new URLSearchParams({
-      file: pdfUrl,
-      // Optional UI tweaks:
-      // 'zoom': 'page-width', // or '100'
-      // 'pagemode': 'thumbs'
-    });
-
-    const frame = document.getElementById("pdfFrame");
-    frame.src = `${viewerBase}?${params.toString()}`;
-  </script>
 </body>
 </html>
