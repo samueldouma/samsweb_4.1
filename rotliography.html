@@ -1,93 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Epidemic Ferment 2025</title>
+  <meta charset="UTF-8" />
+  <title>Epidemic Ferment ROTLIOGRAPHY 2025</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="style.css">
   <style>
     :root {
       --bg: #000;
       --fg: #fff;
-      --muted: #aaa;
       --panel: #111;
-      --accent: #fff;
     }
-
     * { box-sizing: border-box; }
-
+    html, body { height: 100%; }
     body {
-      background-color: var(--bg);
+      margin: 0;
+      padding: 16px;
+      background: var(--bg);
       color: var(--fg);
       font-family: Helvetica, Arial, sans-serif;
-      margin: 40px;
       line-height: 1.6;
     }
+    header { margin: 0 0 16px 0; }
+    h1 { margin: 0; font-size: 1.25rem; font-weight: 600; }
+    main { max-width: 1200px; margin: 0 auto; }
 
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-    }
-
-    h1 {
-      font-size: 1.6rem;
-      margin: 0;
-    }
-
-    main {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .pdf-section {
+    /* Responsive viewer wrapper */
+    .viewer-wrap {
       width: 100%;
-      margin-top: 24px;
       background: var(--panel);
+      border: 1px solid #222;
       border-radius: 8px;
       overflow: hidden;
-      border: 1px solid #222;
     }
-
-    /* The inline PDF frame when supported */
-    .pdf-frame {
-      width: 100%;
-      height: 100vh;        /* desktop/tablet */
-      border: 0;
+    /* Desktop/tablet: fill viewport height */
+    .viewer {
       display: block;
-      background: var(--panel);
+      width: 100%;
+      height: 100vh;
+      border: 0;
     }
-
-    /* Fallback panel for mobile that can’t inline PDFs */
-    .fallback {
-      padding: 20px;
-      text-align: center;
-      color: var(--muted);
-    }
-
-    .btn {
-      display: inline-block;
-      margin-top: 12px;
-      padding: 10px 14px;
-      border: 1px solid var(--accent);
-      color: var(--fg);
-      text-decoration: none;
-      border-radius: 6px;
-    }
-
-    .btn:active,
-    .btn:hover {
-      background: var(--fg);
-      color: var(--bg);
-    }
-
-    /* Mobile adjustments */
+    /* Mobile: avoid browser UI overlap with dynamic viewport units */
     @media (max-width: 700px) {
-      body { margin: 16px; }
-      h1 { font-size: 1.25rem; }
-      /* Use dynamic viewport unit on mobile to avoid browser UI overlap */
-      .pdf-frame { height: 90dvh; }
+      body { padding: 12px; }
+      h1 { font-size: 1.05rem; }
+      .viewer { height: 90dvh; }
     }
   </style>
 </head>
@@ -97,62 +53,35 @@
   </header>
 
   <main>
-    <section class="pdf-section" id="pdf-section">
-      <!-- Filled by JS with either an inline PDF or a fallback button -->
-      <div class="fallback" id="pdf-fallback">
-        Loading…
-      </div>
+    <!-- Uses PDF.js official viewer inside an iframe.
+         This renders ON-PAGE on desktop AND mobile with working in-PDF links. -->
+    <section class="viewer-wrap">
+      <iframe
+        id="pdfFrame"
+        class="viewer"
+        title="ROTLIOGRAPHY PDF Viewer"
+        allow="clipboard-read; clipboard-write"
+        referrerpolicy="no-referrer"
+      ></iframe>
     </section>
   </main>
 
   <script>
-    (function () {
-      const pdfUrl = "https://raw.githubusercontent.com/samueldouma/samsweb_4.1/main/ROTLIOGRAPHY.pdf";
+    // Your raw PDF URL:
+    const pdfUrl = "https://raw.githubusercontent.com/samueldouma/samsweb_4.1/main/ROTLIOGRAPHY.pdf";
 
-      // Basic capability checks:
-      // - iOS Safari historically cannot render embedded PDFs reliably.
-      // - Some Android browsers lack PDF plugins but will open in a new tab.
-      function canInlinePDF() {
-        const ua = navigator.userAgent || "";
-        const isIOS = /iPad|iPhone|iPod/.test(ua);
-        if (isIOS) return false;
+    // Use Mozilla's generic PDF.js viewer (renders PDFs with working links on mobile/desktop)
+    // and pass your file as a URL param. Avoids mobile Safari's <embed>/<object> issues.
+    const viewerBase = "https://mozilla.github.io/pdf.js/web/viewer.html";
+    const params = new URLSearchParams({
+      file: pdfUrl,
+      // Optional UI tweaks:
+      // 'zoom': 'page-width', // or '100'
+      // 'pagemode': 'thumbs'
+    });
 
-        // Check for PDF MIME support (not perfect, but good heuristic)
-        if (navigator.mimeTypes && navigator.mimeTypes["application/pdf"]) return true;
-
-        // Chrome/Edge often render PDFs via built-in viewer even if mimeTypes is empty,
-        // so also detect Chromium.
-        const isChromium = !!window.chrome || /Edg\//.test(ua);
-        return isChromium;
-      }
-
-      function renderInline() {
-        const container = document.getElementById("pdf-section");
-        container.innerHTML = "";
-        const obj = document.createElement("object");
-        obj.setAttribute("data", pdfUrl + "#view=FitH&toolbar=1");
-        obj.setAttribute("type", "application/pdf");
-        obj.className = "pdf-frame";
-        container.appendChild(obj);
-      }
-
-      function renderFallback() {
-        const container = document.getElementById("pdf-section");
-        container.innerHTML = `
-          <div class="fallback">
-            Your device doesn’t display embedded PDFs. 
-            <br>
-            <a class="btn" href="${pdfUrl}" target="_blank" rel="noopener">Open the PDF</a>
-          </div>
-        `;
-      }
-
-      if (canInlinePDF()) {
-        renderInline();
-      } else {
-        renderFallback();
-      }
-    })();
+    const frame = document.getElementById("pdfFrame");
+    frame.src = `${viewerBase}?${params.toString()}`;
   </script>
 </body>
 </html>
