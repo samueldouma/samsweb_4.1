@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Epidemic Ferment 2025; A 'ROTLIOGRAPHY'</title>
+  <title>Epidemic Ferment 2025</title>
   <link rel="stylesheet" href="style.css">
   <style>
     body {
@@ -48,31 +48,35 @@
       margin-bottom: 20px;
     }
 
-    .image-frame {
-      margin-top: 40px;
-      border: 1px solid #333;
-      border-radius: 6px;
-      padding: 20px;
-      text-align: center;
-      color: #777;
-    }
-
-    iframe {
+    /* New full-width PDF embed */
+    .pdf-section {
       width: 100%;
-      height: 600px;
-      border: none;
-      border-radius: 6px;
-      margin-top: 20px;
-      background-color: #111;
+      margin-top: 60px;
     }
 
-    <!-- Original framed cover preview -->
-    <div class="image-frame">
-      <p>Preview of the print publication:</p>
-      <iframe src="assets/epidemic-ferment-2025/epidemicfermentthumbnail.pdf"></iframe>
-    </div>
+    .pdf-frame {
+      width: 100%;
+      height: 100vh;
+      border: none;
+      background: #111;
+      display: block;
+    }
 
-    <!-- New full-width embedded PDF -->
+    @media (max-width: 700px) {
+      .pdf-frame {
+        height: 90vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Epidemic Ferment ROTLIOGRAPHY 2025</h1>
+  </header>
+
+  <main>
+
+    <!-- Full-width embedded PDF (only this embed remains) -->
     <section class="pdf-section">
       <embed
         class="pdf-frame"
