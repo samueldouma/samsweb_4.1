@@ -1,126 +1,241 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Epidemic Ferment 2025</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
+
   <style>
+    :root{
+      --bg:#000;
+      --fg:#fff;
+      --muted:rgba(255,255,255,0.75);
+      --border:rgba(255,255,255,0.18);
+      --panel:rgba(255,255,255,0.06);
+      --max:920px;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
-      background-color: black;
-      color: white;
+      background-color: var(--bg);
+      color: var(--fg);
       font-family: Helvetica, Arial, sans-serif;
-      margin: 40px;
-      line-height: 1.6;
+      margin: 0;
+      line-height: 1.65;
+    }
+
+    /* Page padding that adapts nicely */
+    .wrap {
+      padding: clamp(18px, 4vw, 44px);
     }
 
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 40px;
+      gap: 16px;
+      margin-bottom: 28px;
     }
 
     h1 {
-      font-size: 1.8em;
+      font-size: clamp(1.25rem, 3.2vw, 2.1rem);
       margin: 0;
+      letter-spacing: 0.2px;
     }
 
     a.back-button {
-      color: white;
+      color: var(--fg);
       text-decoration: none;
-      border: 1px solid white;
-      padding: 6px 12px;
-      border-radius: 4px;
-      transition: 0.2s;
+      border: 1px solid var(--fg);
+      padding: 10px 14px;
+      border-radius: 10px;
+      transition: 0.15s;
+      font-size: 1rem;
+      white-space: nowrap;
     }
 
     a.back-button:hover {
-      background-color: white;
-      color: black;
+      background-color: var(--fg);
+      color: var(--bg);
     }
 
     main {
-      max-width: 800px;
+      max-width: var(--max);
       margin: 0 auto;
     }
 
     p {
-      margin-bottom: 20px;
+      margin: 0 0 18px 0;
+      font-size: clamp(1.02rem, 1.2vw, 1.12rem);
+      color: var(--muted);
+    }
+    strong { color: var(--fg); }
+
+    .panel {
+      margin-top: 28px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      background: var(--panel);
     }
 
-    .image-frame {
-      margin-top: 40px;
-      border: 1px solid #333;
-      border-radius: 6px;
-      padding: 20px;
-      text-align: center;
-      color: #777;
+    .section-title {
+      margin: 0 0 10px 0;
+      font-size: 1.05rem;
+      color: var(--fg);
+      opacity: 0.95;
     }
 
-    iframe {
+    /* --- Google Form: full-screen-ish on mobile --- */
+    .form-frame {
       width: 100%;
-      height: 600px;
       border: none;
-      border-radius: 6px;
-      margin-top: 20px;
-      background-color: #111;
-    }
-
-    /* New full-width PDF embed */
-    .pdf-section {
-      width: 100%;
-      margin-top: 60px;
-    }
-
-    .pdf-frame {
-      width: 100%;
-      height: 100vh;
-      border: none;
+      border-radius: 12px;
       background: #111;
       display: block;
+      /* default desktop height */
+      height: 740px;
     }
 
+    /* --- PDF viewer iframe (mobile-safe) --- */
+    .pdf-frame {
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      background: #111;
+      display: block;
+
+      /* Use dynamic viewport units where supported (better on iOS) */
+      height: 92dvh;
+      min-height: 620px;
+    }
+
+    .pdf-actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pdf-actions a {
+      display: inline-block;
+      color: var(--fg);
+      text-decoration: none;
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.04);
+      font-size: 0.98rem;
+    }
+
+    .pdf-actions a:hover {
+      border-color: rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.08);
+    }
+
+    /* Mobile tuning */
     @media (max-width: 700px) {
-      iframe {
-        height: 400px;
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-bottom: 18px;
       }
+
+      a.back-button {
+        width: 100%;
+        text-align: center;
+        padding: 12px 14px;
+      }
+
+      /* Make the form fill the screen more aggressively on phones */
+      .form-frame {
+        height: calc(100dvh - 210px); /* header + text roughly */
+        min-height: 560px;
+        border-radius: 12px;
+      }
+
+      /* PDF: near full screen */
       .pdf-frame {
-        height: 90vh;
+        height: 92dvh;
+        min-height: 560px;
       }
     }
   </style>
 </head>
+
 <body>
-  <header>
-    <h1>Epidemic Ferment 2025</h1>
-    <a href="scribo.html" class="back-button">Back to Scribo</a>
-  </header>
+  <div class="wrap">
+    <header>
+      <h1>Epidemic Ferment 2025</h1>
+      <a href="scribo.html" class="back-button">Back to Scribo</a>
+    </header>
 
-  <main>
-    <p>
-      <strong>Epidemic Ferment</strong> is a hybrid research-publication / experimental magazine / enthnographic manifesto which emerged from my Senior Integrated Project at Kalamazoo College. It investigates the social, psychological, and neurological effects of life within algorithmic media systems. Through a mix of essay, theory, and 'field documentation' (a.k.a. scrolling on Instagram Reels), the project examines how digital infrastructures shape perception, memory, and collective behavior, and how these forces have come to define modern digital life.
-    </p>
+    <main>
+      <p>
+        <strong>Epidemic Ferment</strong> is a hybrid research-publication / experimental magazine / ethnographic manifesto
+        which emerged from my Senior Integrated Project at Kalamazoo College. It investigates the social, psychological,
+        and neurological effects of life within algorithmic media systems. Through a mix of essay, theory, and 'field documentation'
+        (a.k.a. scrolling on Instagram Reels), the project examines how digital infrastructures shape perception, memory,
+        and collective behavior, and how these forces have come to define modern digital life.
+      </p>
 
-    <p>
-      Printed as a booklet and accompanied by an evolving digital archive, <strong>Epidemic Ferment</strong> functions as both a study and a provocation: a documentation of the brain-rot age and a gesture toward fermentation—toward synthesis, renewal, and mindful participation in the informational ecosystem. What follows is some associated material as well as the means to acquire a copy of it yourself.
-    </p>
-    
-    
+      <p>
+        Printed as a booklet and accompanied by an evolving digital archive, <strong>Epidemic Ferment</strong> functions
+        as both a study and a provocation: a documentation of the brain-rot age and a gesture toward fermentation—toward
+        synthesis, renewal, and mindful participation in the informational ecosystem. What follows is associated material
+        and a way to acquire a copy.
+      </p>
 
-    <!-- Original framed cover preview -->
-    <div class="image-frame">
-      <p></p>
-      <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfgVP-eyb3io5j-R1Z2rCvS8naXIXCQrmAZAct4hJQvkb_fZg/viewform?usp=sharing&ouid=101384225729308783855"></iframe>
-    </div>
+      <!-- ORDER / FORM -->
+      <section class="panel">
+        <div class="section-title">Order / Request a copy</div>
 
-    <!-- New full-width embedded PDF -->
-    <section class="pdf-section">
-      <embed
-        class="pdf-frame"
-        src="https://raw.githubusercontent.com/samueldouma/samsweb_4.1/main/ROTLIOGRAPHY.pdf#view=FitH&toolbar=1"
-        type="application/pdf"
-      />
-    </section>
-  </main>
+        <iframe
+          class="form-frame"
+          src="https://docs.google.com/forms/d/e/1FAIpQLSfgVP-eyb3io5j-R1Z2rCvS8naXIXCQrmAZAct4hJQvkb_fZg/viewform?usp=sharing&ouid=101384225729308783855"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+      </section>
+
+      <!-- BIBLIOGRAPHY (NEW) -->
+      <section class="panel" style="margin-top: 34px;">
+        <div class="section-title">Bibliography (PDF)</div>
+
+        <!-- Mobile-safe PDF embed via Google viewer -->
+        <iframe
+          class="pdf-frame"
+          src="https://docs.google.com/gview?embedded=1&url=https://samueldouma.github.io/samsweb_4.1/efbibliography.pdf"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+
+        <div class="pdf-actions">
+          <a href="efbibliography.pdf" target="_blank" rel="noopener">Open bibliography in new tab</a>
+          <a href="efbibliography.pdf" download>Download bibliography</a>
+        </div>
+      </section>
+
+      <!-- ROTLIOGRAPHY -->
+      <section class="panel" style="margin-top: 34px;">
+        <div class="section-title">Rotliography (PDF)</div>
+
+        <!-- Mobile-safe PDF embed via Google viewer -->
+        <iframe
+          class="pdf-frame"
+          src="https://docs.google.com/gview?embedded=1&url=https://samueldouma.github.io/samsweb_4.1/ROTLIOGRAPHY.pdf"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+
+        <div class="pdf-actions">
+          <a href="ROTLIOGRAPHY.pdf" target="_blank" rel="noopener">Open rotliography in new tab</a>
+          <a href="ROTLIOGRAPHY.pdf" download>Download rotliography</a>
+        </div>
+      </section>
+    </main>
+  </div>
 </body>
 </html>
