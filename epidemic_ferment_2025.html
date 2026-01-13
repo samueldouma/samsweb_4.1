@@ -26,31 +26,30 @@
       line-height: 1.65;
     }
 
-    /* Make sure nothing renders bold */
-    b, strong, h1, h2, h3, h4, h5, h6 {
-      font-weight: 400;
-    }
+    /* ensure nothing renders bold */
+    b, strong, h1, h2, h3, h4, h5, h6 { font-weight: 400; }
 
     .wrap {
       padding: clamp(16px, 4vw, 44px);
     }
 
     header {
-      position: relative;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
       margin-bottom: 18px;
-      padding-top: 6px;
     }
 
     h1 {
       margin: 0;
-      font-size: clamp(1.4rem, 3.2vw, 2.2rem);
+      font-size: clamp(1.5rem, 3.6vw, 2.3rem);
       letter-spacing: 0.2px;
+      line-height: 1.15;
+      flex: 1;
     }
 
     a.back-button {
-      position: absolute;
-      top: 0;
-      right: 0;
       color: var(--fg);
       text-decoration: none;
       border: 1px solid var(--fg);
@@ -58,7 +57,9 @@
       border-radius: 10px;
       font-size: 0.9rem;
       line-height: 1;
+      white-space: nowrap;
       opacity: 0.95;
+      margin-top: 2px;
     }
 
     a.back-button:hover {
@@ -103,52 +104,44 @@
       height: 740px;
     }
 
-    /* PDF viewer (PDF.js in an iframe) */
-    .pdf-frame {
-      width: 100%;
-      border: none;
-      border-radius: 12px;
-      background: #111;
-      display: block;
-      height: 92dvh;
-      min-height: 620px;
-    }
-
-    .pdf-actions {
-      margin-top: 10px;
+    /* centered rounded white buttons */
+    .button-row {
       display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 0 6px 0;
     }
 
-    .pdf-actions a {
+    .pdf-button {
       display: inline-block;
-      color: var(--fg);
+      width: min(520px, 100%);
+      text-align: center;
+      background: #fff;
+      color: #000;
       text-decoration: none;
-      border: 1px solid var(--border);
-      padding: 8px 10px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.04);
-      font-size: 0.95rem;
-      opacity: 0.95;
+      border-radius: 999px;
+      padding: 14px 18px;
+      font-size: clamp(1.05rem, 1.4vw, 1.15rem);
+      border: 1px solid rgba(255,255,255,0.55);
     }
 
-    .pdf-actions a:hover {
-      border-color: rgba(255,255,255,0.4);
-      background: rgba(255,255,255,0.08);
+    .pdf-button:hover {
+      opacity: 0.92;
     }
 
     @media (max-width: 700px) {
-      header { margin-bottom: 14px; }
-      a.back-button { font-size: 0.85rem; padding: 6px 9px; }
-
-      .form-frame {
-        height: calc(100dvh - 210px);
-        min-height: 560px;
+      header {
+        align-items: flex-start;
       }
 
-      .pdf-frame {
-        height: 92dvh;
+      a.back-button {
+        font-size: 0.85rem;
+        padding: 6px 9px;
+      }
+
+      .form-frame {
+        height: calc(100dvh - 220px);
         min-height: 560px;
       }
     }
@@ -190,38 +183,18 @@
         ></iframe>
       </section>
 
-      <!-- BIBLIOGRAPHY (NEW) -->
+      <!-- PDF LINKS (NO EMBEDS) -->
       <section class="panel" style="margin-top: 34px;">
-        <div class="section-title">Bibliography (PDF)</div>
+        <div class="section-title">PDFs</div>
 
-        <!-- PDF.js viewer (works on iOS/Android reliably) -->
-        <iframe
-          class="pdf-frame"
-          src="https://mozilla.github.io/pdf.js/web/viewer.html?file=https%3A%2F%2Fsamueldouma.github.io%2Fsamsweb_4.1%2Fefbibliography.pdf"
-          loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade"
-        ></iframe>
+        <div class="button-row">
+          <a class="pdf-button" href="efbibliography.pdf" target="_blank" rel="noopener">
+            Open Bibliography (PDF)
+          </a>
 
-        <div class="pdf-actions">
-          <a href="efbibliography.pdf" target="_blank" rel="noopener">Open PDF</a>
-          <a href="efbibliography.pdf" download>Download PDF</a>
-        </div>
-      </section>
-
-      <!-- ROTLIOGRAPHY -->
-      <section class="panel" style="margin-top: 34px;">
-        <div class="section-title">Rotliography (PDF)</div>
-
-        <iframe
-          class="pdf-frame"
-          src="https://mozilla.github.io/pdf.js/web/viewer.html?file=https%3A%2F%2Fsamueldouma.github.io%2Fsamsweb_4.1%2FROTLIOGRAPHY.pdf"
-          loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade"
-        ></iframe>
-
-        <div class="pdf-actions">
-          <a href="ROTLIOGRAPHY.pdf" target="_blank" rel="noopener">Open PDF</a>
-          <a href="ROTLIOGRAPHY.pdf" download>Download PDF</a>
+          <a class="pdf-button" href="ROTLIOGRAPHY.pdf" target="_blank" rel="noopener">
+            Open Rotliography (PDF)
+          </a>
         </div>
       </section>
 
