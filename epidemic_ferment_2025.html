@@ -10,8 +10,7 @@
     :root{
       --bg:#000;
       --fg:#fff;
-      --muted:rgba(255,255,255,0.75);
-      --border:rgba(255,255,255,0.18);
+      --border:rgba(255,255,255,0.22);
       --panel:rgba(255,255,255,0.06);
       --max:920px;
     }
@@ -19,45 +18,51 @@
     * { box-sizing: border-box; }
 
     body {
-      background-color: var(--bg);
+      background: var(--bg);
       color: var(--fg);
-      font-family: Helvetica, Arial, sans-serif;
+      font-family: "Apple Garamond", Garamond, "Times New Roman", serif;
+      font-weight: 400;
       margin: 0;
       line-height: 1.65;
     }
 
-    /* Page padding that adapts nicely */
+    /* Make sure nothing renders bold */
+    b, strong, h1, h2, h3, h4, h5, h6 {
+      font-weight: 400;
+    }
+
     .wrap {
-      padding: clamp(18px, 4vw, 44px);
+      padding: clamp(16px, 4vw, 44px);
     }
 
     header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 28px;
+      position: relative;
+      margin-bottom: 18px;
+      padding-top: 6px;
     }
 
     h1 {
-      font-size: clamp(1.25rem, 3.2vw, 2.1rem);
       margin: 0;
+      font-size: clamp(1.4rem, 3.2vw, 2.2rem);
       letter-spacing: 0.2px;
     }
 
     a.back-button {
+      position: absolute;
+      top: 0;
+      right: 0;
       color: var(--fg);
       text-decoration: none;
       border: 1px solid var(--fg);
-      padding: 10px 14px;
+      padding: 6px 10px;
       border-radius: 10px;
-      transition: 0.15s;
-      font-size: 1rem;
-      white-space: nowrap;
+      font-size: 0.9rem;
+      line-height: 1;
+      opacity: 0.95;
     }
 
     a.back-button:hover {
-      background-color: var(--fg);
+      background: var(--fg);
       color: var(--bg);
     }
 
@@ -67,14 +72,14 @@
     }
 
     p {
-      margin: 0 0 18px 0;
-      font-size: clamp(1.02rem, 1.2vw, 1.12rem);
-      color: var(--muted);
+      margin: 0 0 16px 0;
+      font-size: clamp(1.05rem, 1.3vw, 1.15rem);
+      color: var(--fg);
+      opacity: 0.92;
     }
-    strong { color: var(--fg); }
 
     .panel {
-      margin-top: 28px;
+      margin-top: 26px;
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 14px;
@@ -88,26 +93,23 @@
       opacity: 0.95;
     }
 
-    /* --- Google Form: full-screen-ish on mobile --- */
+    /* Google Form */
     .form-frame {
       width: 100%;
       border: none;
       border-radius: 12px;
       background: #111;
       display: block;
-      /* default desktop height */
       height: 740px;
     }
 
-    /* --- PDF viewer iframe (mobile-safe) --- */
+    /* PDF viewer (PDF.js in an iframe) */
     .pdf-frame {
       width: 100%;
       border: none;
       border-radius: 12px;
       background: #111;
       display: block;
-
-      /* Use dynamic viewport units where supported (better on iOS) */
       height: 92dvh;
       min-height: 620px;
     }
@@ -124,39 +126,27 @@
       color: var(--fg);
       text-decoration: none;
       border: 1px solid var(--border);
-      padding: 10px 12px;
+      padding: 8px 10px;
       border-radius: 10px;
       background: rgba(255,255,255,0.04);
-      font-size: 0.98rem;
+      font-size: 0.95rem;
+      opacity: 0.95;
     }
 
     .pdf-actions a:hover {
-      border-color: rgba(255,255,255,0.35);
+      border-color: rgba(255,255,255,0.4);
       background: rgba(255,255,255,0.08);
     }
 
-    /* Mobile tuning */
     @media (max-width: 700px) {
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-        margin-bottom: 18px;
-      }
+      header { margin-bottom: 14px; }
+      a.back-button { font-size: 0.85rem; padding: 6px 9px; }
 
-      a.back-button {
-        width: 100%;
-        text-align: center;
-        padding: 12px 14px;
-      }
-
-      /* Make the form fill the screen more aggressively on phones */
       .form-frame {
-        height: calc(100dvh - 210px); /* header + text roughly */
+        height: calc(100dvh - 210px);
         min-height: 560px;
-        border-radius: 12px;
       }
 
-      /* PDF: near full screen */
       .pdf-frame {
         height: 92dvh;
         min-height: 560px;
@@ -174,18 +164,18 @@
 
     <main>
       <p>
-        <strong>Epidemic Ferment</strong> is a hybrid research-publication / experimental magazine / ethnographic manifesto
-        which emerged from my Senior Integrated Project at Kalamazoo College. It investigates the social, psychological,
-        and neurological effects of life within algorithmic media systems. Through a mix of essay, theory, and 'field documentation'
-        (a.k.a. scrolling on Instagram Reels), the project examines how digital infrastructures shape perception, memory,
-        and collective behavior, and how these forces have come to define modern digital life.
+        Epidemic Ferment is a hybrid research-publication / experimental magazine / ethnographic manifesto which emerged
+        from my Senior Integrated Project at Kalamazoo College. It investigates the social, psychological, and neurological
+        effects of life within algorithmic media systems. Through a mix of essay, theory, and field documentation
+        (scrolling on Instagram Reels), the project examines how digital infrastructures shape perception, memory, and
+        collective behavior, and how these forces have come to define modern digital life.
       </p>
 
       <p>
-        Printed as a booklet and accompanied by an evolving digital archive, <strong>Epidemic Ferment</strong> functions
-        as both a study and a provocation: a documentation of the brain-rot age and a gesture toward fermentation—toward
-        synthesis, renewal, and mindful participation in the informational ecosystem. What follows is associated material
-        and a way to acquire a copy.
+        Printed as a booklet and accompanied by an evolving digital archive, Epidemic Ferment functions as both a study
+        and a provocation: a documentation of the brain-rot age and a gesture toward fermentation—toward synthesis,
+        renewal, and mindful participation in the informational ecosystem. What follows is associated material and a way
+        to acquire a copy.
       </p>
 
       <!-- ORDER / FORM -->
@@ -204,17 +194,17 @@
       <section class="panel" style="margin-top: 34px;">
         <div class="section-title">Bibliography (PDF)</div>
 
-        <!-- Mobile-safe PDF embed via Google viewer -->
+        <!-- PDF.js viewer (works on iOS/Android reliably) -->
         <iframe
           class="pdf-frame"
-          src="https://docs.google.com/gview?embedded=1&url=https://samueldouma.github.io/samsweb_4.1/efbibliography.pdf"
+          src="https://mozilla.github.io/pdf.js/web/viewer.html?file=https%3A%2F%2Fsamueldouma.github.io%2Fsamsweb_4.1%2Fefbibliography.pdf"
           loading="lazy"
           referrerpolicy="no-referrer-when-downgrade"
         ></iframe>
 
         <div class="pdf-actions">
-          <a href="efbibliography.pdf" target="_blank" rel="noopener">Open bibliography in new tab</a>
-          <a href="efbibliography.pdf" download>Download bibliography</a>
+          <a href="efbibliography.pdf" target="_blank" rel="noopener">Open PDF</a>
+          <a href="efbibliography.pdf" download>Download PDF</a>
         </div>
       </section>
 
@@ -222,19 +212,19 @@
       <section class="panel" style="margin-top: 34px;">
         <div class="section-title">Rotliography (PDF)</div>
 
-        <!-- Mobile-safe PDF embed via Google viewer -->
         <iframe
           class="pdf-frame"
-          src="https://docs.google.com/gview?embedded=1&url=https://samueldouma.github.io/samsweb_4.1/ROTLIOGRAPHY.pdf"
+          src="https://mozilla.github.io/pdf.js/web/viewer.html?file=https%3A%2F%2Fsamueldouma.github.io%2Fsamsweb_4.1%2FROTLIOGRAPHY.pdf"
           loading="lazy"
           referrerpolicy="no-referrer-when-downgrade"
         ></iframe>
 
         <div class="pdf-actions">
-          <a href="ROTLIOGRAPHY.pdf" target="_blank" rel="noopener">Open rotliography in new tab</a>
-          <a href="ROTLIOGRAPHY.pdf" download>Download rotliography</a>
+          <a href="ROTLIOGRAPHY.pdf" target="_blank" rel="noopener">Open PDF</a>
+          <a href="ROTLIOGRAPHY.pdf" download>Download PDF</a>
         </div>
       </section>
+
     </main>
   </div>
 </body>
