@@ -5,188 +5,425 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Story Test</title>
 
-  <!-- Karla font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;700;800&display=swap" rel="stylesheet">
 
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --page-bg: #f5f1e8;
+      --text: #111;
+      --caption: #545454;
+      --panel: rgba(245, 241, 232, 0.86);
+      --panel-border: rgba(255, 255, 255, 0.35);
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
 
     body {
       margin: 0;
-      font-family: "Karla", sans-serif;
-      background: #f5f1e8;
-      color: #111;
+      font-family: "Karla", Arial, Helvetica, sans-serif;
+      background: var(--page-bg);
+      color: var(--text);
       overflow-x: hidden;
+      line-height: 1.5;
     }
 
-    /* HERO */
+    img {
+      display: block;
+      max-width: 100%;
+    }
 
     .hero {
-      height: 100svh;
-      background: url("assets/story-test/img_01.jpg") center/cover no-repeat;
+      min-height: 100svh;
+      min-height: 100vh;
+      background:
+        linear-gradient(rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0.38)),
+        url("assets/story-test/img_01.jpg") center center / cover no-repeat;
       display: flex;
       align-items: flex-end;
-      padding: 5vw;
+      padding: clamp(20px, 5vw, 56px);
       color: white;
+      position: relative;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 20vh;
+      background: linear-gradient(to bottom, rgba(245, 241, 232, 0), rgba(245, 241, 232, 1));
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+    }
+
+    .hero-kicker {
+      margin: 0 0 0.75rem 0;
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      opacity: 0.95;
+      font-weight: 700;
     }
 
     .hero h1 {
-      font-size: clamp(2.5rem, 8vw, 5rem);
-      margin: 0;
+      margin: 0 0 0.9rem 0;
+      font-size: clamp(2.6rem, 8vw, 5.4rem);
+      line-height: 0.93;
       max-width: 10ch;
     }
 
-    .hero p {
-      margin: 0.5rem 0;
-      max-width: 400px;
+    .hero-deck {
+      margin: 0 0 1.1rem 0;
+      font-size: clamp(1rem, 2.7vw, 1.2rem);
+      max-width: 38rem;
+      line-height: 1.42;
     }
 
-    /* SCROLLY SECTION */
+    .hero-scroll {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 500;
+      opacity: 0.92;
+    }
 
     .scrolly {
+      position: relative;
+    }
+
+    .scrolly-grid {
       display: grid;
       grid-template-columns: 1fr;
     }
 
-    .sticky {
+    .sticky-visual {
       position: sticky;
       top: 0;
       height: 100svh;
+      height: 100vh;
       z-index: 1;
+      overflow: hidden;
+      background: #ddd;
     }
 
-    .sticky img {
+    .visual-stack {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      transform: scale(1.02);
+      transition: transform 900ms ease;
+    }
+
+    .visual-stack.is-shifted {
+      transform: scale(1.06);
+    }
+
+    .visual-layer {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transform: scale(1.015);
+      transition:
+        opacity 700ms ease,
+        transform 1400ms ease;
+      will-change: opacity, transform;
+      pointer-events: none;
+    }
+
+    .visual-layer.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .visual-layer img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      object-position: center center;
+      filter: saturate(1.01) contrast(1.01);
+    }
+
+    .visual-overlay {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.10), rgba(0, 0, 0, 0.04) 35%, rgba(0, 0, 0, 0.18));
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .visual-caption {
+      position: absolute;
+      left: clamp(16px, 3vw, 28px);
+      right: clamp(16px, 3vw, 28px);
+      bottom: clamp(16px, 3vw, 28px);
+      z-index: 3;
+      color: white;
+      font-size: 0.95rem;
+      line-height: 1.35;
+      max-width: 34rem;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+      transition: opacity 350ms ease;
     }
 
     .steps {
       position: relative;
       z-index: 2;
+      padding-bottom: 10vh;
     }
 
     .step {
-      min-height: 90vh;
+      min-height: 88vh;
       display: flex;
       align-items: center;
-      padding: 0 5vw;
+      padding: 0 clamp(16px, 4vw, 40px);
     }
 
     .step-inner {
-      max-width: 600px;
-      font-size: clamp(1.1rem, 2.5vw, 1.3rem);
-      line-height: 1.6;
-      background: rgba(245, 241, 232, 0.9);
-      padding: 20px;
+      width: min(100%, 640px);
+      background: var(--panel);
+      backdrop-filter: blur(7px);
+      -webkit-backdrop-filter: blur(7px);
+      border: 1px solid var(--panel-border);
+      box-shadow: var(--shadow);
+      padding: clamp(18px, 3vw, 28px);
     }
 
-    /* END BLOCK */
+    .step-kicker {
+      margin: 0 0 0.55rem 0;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 700;
+      opacity: 0.7;
+    }
+
+    .step-inner p {
+      margin: 0;
+      font-size: clamp(1.05rem, 2.4vw, 1.3rem);
+      line-height: 1.56;
+    }
+
+    .step.is-active .step-inner {
+      transform: translateY(0);
+    }
+
+    .step-inner {
+      transform: translateY(16px);
+      transition: transform 550ms ease, box-shadow 550ms ease;
+    }
+
+    .step.is-active .step-inner {
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.16);
+    }
 
     .end {
-      padding: 80px 5vw;
-      max-width: 700px;
-      margin: auto;
-      font-size: 1.2rem;
+      width: min(100% - 32px, 760px);
+      margin: 0 auto;
+      padding: clamp(56px, 9vw, 120px) 0;
     }
 
-    /* DESKTOP SPLIT */
+    .end p {
+      margin: 0;
+      font-size: clamp(1.08rem, 2.4vw, 1.28rem);
+      line-height: 1.6;
+    }
 
-    @media (min-width: 900px) {
-      .scrolly {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .sticky {
-        grid-column: 2;
+    @media (min-width: 950px) {
+      .scrolly-grid {
+        grid-template-columns: minmax(320px, 0.95fr) minmax(420px, 1.05fr);
       }
 
       .steps {
         grid-column: 1;
       }
 
+      .sticky-visual {
+        grid-column: 2;
+      }
+
       .step {
-        padding: 0 3vw;
+        padding-left: clamp(26px, 4vw, 48px);
+        padding-right: clamp(18px, 2vw, 28px);
       }
     }
 
+    @media (max-width: 949px) {
+      .sticky-visual {
+        height: 64svh;
+        height: 64vh;
+      }
+
+      .steps {
+        margin-top: -8vh;
+      }
+
+      .step {
+        min-height: 72vh;
+      }
+
+      .step-inner {
+        margin-top: 0;
+      }
+
+      .visual-caption {
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      .visual-layer,
+      .visual-stack,
+      .step-inner,
+      .visual-caption {
+        transition: none;
+      }
+    }
   </style>
 </head>
 
 <body>
-
-  <!-- HERO -->
   <section class="hero">
-    <div>
-      <h1>Γάτοι στη Μηχανή:</h1>
-      <p>Γάτοι στη Μηχανή: A Year of Pangrati's Purring Passengers</p>
-      <p>Scroll ↓</p>
+    <div class="hero-inner">
+      <p class="hero-kicker">Visual Story Template</p>
+      <h1>Replace This With Your Title</h1>
+      <p class="hero-deck">
+        Replace this with a short subtitle that frames the piece cleanly and without excess explanation.
+      </p>
+      <p class="hero-scroll">Scroll to begin</p>
     </div>
   </section>
 
-  <!-- SCROLLY -->
   <section class="scrolly">
+    <div class="scrolly-grid">
+      <div class="steps">
+        <div class="step is-active" data-img="img_01.jpg" data-caption="Replace this with the first image caption.">
+          <div class="step-inner">
+            <p class="step-kicker">Section 01</p>
+            <p>
+              Opening paragraph. Establish place, material conditions, or the basic situation. Keep it controlled.
+            </p>
+          </div>
+        </div>
 
-    <!-- STICKY IMAGE -->
-    <div class="sticky">
-      <img id="mainImage" src="assets/story-test/img_01.jpg">
-    </div>
+        <div class="step" data-img="img_02.jpg" data-caption="Replace this with the second image caption.">
+          <div class="step-inner">
+            <p class="step-kicker">Section 02</p>
+            <p>
+              Add tension or contradiction. The image should not merely illustrate the text; it should complicate it.
+            </p>
+          </div>
+        </div>
 
-    <!-- TEXT STEPS -->
-    <div class="steps">
+        <div class="step" data-img="img_03.jpg" data-caption="Replace this with the third image caption.">
+          <div class="step-inner">
+            <p class="step-kicker">Section 03</p>
+            <p>
+              Shift the register. Introduce a different scale, angle, or emotional pressure so the page does not flatten out.
+            </p>
+          </div>
+        </div>
 
-      <div class="step" data-img="img_01.jpg">
-        <div class="step-inner">
-         Ailourofóra Ochímata - Cat-bearing Vehicles
+        <div class="step" data-img="img_04.jpg" data-caption="Replace this with the fourth image caption.">
+          <div class="step-inner">
+            <p class="step-kicker">Section 04</p>
+            <p>
+              Move toward compression. The final image should feel like a culmination, not another interchangeable beat.
+            </p>
+          </div>
         </div>
       </div>
 
-      <div class="step" data-img="img_01.jpg">
-        <div class="step-inner">
-          hmmmmmm
+      <div class="sticky-visual">
+        <div class="visual-stack" id="visualStack">
+          <div class="visual-layer active" data-layer="img_01.jpg">
+            <img src="assets/story-test/img_01.jpg" alt="Replace this with a description of image one.">
+          </div>
+          <div class="visual-layer" data-layer="img_02.jpg">
+            <img src="assets/story-test/img_02.jpg" alt="Replace this with a description of image two.">
+          </div>
+          <div class="visual-layer" data-layer="img_03.jpg">
+            <img src="assets/story-test/img_03.jpg" alt="Replace this with a description of image three.">
+          </div>
+          <div class="visual-layer" data-layer="img_04.jpg">
+            <img src="assets/story-test/img_04.jpg" alt="Replace this with a description of image four.">
+          </div>
+          <div class="visual-overlay"></div>
+          <div class="visual-caption" id="visualCaption">
+            Replace this with the first image caption.
+          </div>
         </div>
       </div>
-
-      <div class="step" data-img="img_02.jpg">
-        <div class="step-inner">
-         This is the cat calendar.
-        </div>
-      </div>
-
-      <div class="step" data-img="img_02.jpg">
-        <div class="step-inner">
-         I am now Extending the narrative toward a conclusion.
-        </div>
-      </div>
-
     </div>
   </section>
 
-  <!-- END -->
   <section class="end">
-    Closing paragraph. Compression, not summary.
+    <p>
+      Closing paragraph. End with compression rather than summary. This file is now a template: duplicate it, swap images, replace captions and text, and keep the structure.
+    </p>
   </section>
 
-  <!-- SCRIPT -->
   <script>
     const steps = document.querySelectorAll(".step");
-    const img = document.getElementById("mainImage");
+    const layers = document.querySelectorAll(".visual-layer");
+    const caption = document.getElementById("visualCaption");
+    const stack = document.getElementById("visualStack");
 
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const newImg = entry.target.dataset.img;
-          img.src = "assets/story-test/" + newImg;
-        }
+    function setActiveVisual(filename, captionText) {
+      layers.forEach(layer => {
+        const isMatch = layer.dataset.layer === filename;
+        layer.classList.toggle("active", isMatch);
+      });
+
+      caption.style.opacity = "0";
+
+      window.setTimeout(() => {
+        caption.textContent = captionText || "";
+        caption.style.opacity = "1";
+      }, 180);
+    }
+
+    function setActiveStep(activeStep) {
+      steps.forEach(step => step.classList.remove("is-active"));
+      activeStep.classList.add("is-active");
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+
+        const step = entry.target;
+        const filename = step.dataset.img;
+        const captionText = step.dataset.caption;
+
+        setActiveStep(step);
+        setActiveVisual(filename, captionText);
+
+        const index = Array.from(steps).indexOf(step);
+        stack.classList.toggle("is-shifted", index >= 2);
       });
     }, {
-      threshold: 0.6
+      threshold: 0.58
     });
 
     steps.forEach(step => observer.observe(step));
   </script>
-
 </body>
 </html>
