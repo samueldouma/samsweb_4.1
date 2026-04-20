@@ -10,7 +10,7 @@ const render = Render.create({
   options: {
     width: window.innerWidth,
     height: window.innerHeight,
-    background: "#ffffff", // white homepage
+    background: "#ffffff",
     wireframes: false
   }
 });
@@ -22,9 +22,9 @@ Matter.Render.setPixelRatio(render, Math.max(1, window.devicePixelRatio || 1));
  * Visited memory + explicit "only color AFTER a click" session flag
  * ------------------------------------------------------------------ */
 const VISITED_KEY = "visitedBubbles_v2";
-const COLOR_FLAG  = "enableVisitedColors_v1"; // set to "1" only when user clicks a bubble
+const COLOR_FLAG = "enableVisitedColors_v1";
 
-// Optional nukes via URL: ?reset=1 clears everything
+// Optional reset via URL: ?reset=1
 try {
   const u = new URL(window.location.href);
   if (u.searchParams.get("reset") === "1") {
@@ -42,10 +42,6 @@ try {
   visited = [];
 }
 
-// IMPORTANT: We DO NOT show colors unless this session flag is set.
-// First load -> flag not set -> all bubbles white.
-// After user clicks a bubble (before navigation) -> we set the flag.
-// Returning to this page -> flag present -> show colored visited bubbles.
 const enableVisitedColors = sessionStorage.getItem(COLOR_FLAG) === "1";
 
 /* ---------------------- Colors (indexed palette) ------------------- */
@@ -59,49 +55,45 @@ const colorPalette = [
   "#8B00FF"  // Violet
 ];
 
+// Invert a hex color like #RRGGBB
+function invertHexColor(hex) {
+  const clean = hex.replace("#", "");
+  const r = 255 - parseInt(clean.slice(0, 2), 16);
+  const g = 255 - parseInt(clean.slice(2, 4), 16);
+  const b = 255 - parseInt(clean.slice(4, 6), 16);
+
+  return (
+    "#" +
+    r.toString(16).padStart(2, "0") +
+    g.toString(16).padStart(2, "0") +
+    b.toString(16).padStart(2, "0")
+  ).toUpperCase();
+}
+
 /* --------------------------- Boundaries ---------------------------- */
 let boundaryBodies = [];
+
 function addBoundaries() {
   const t = 50;
   const w = window.innerWidth;
   const h = window.innerHeight;
+
   boundaryBodies = [
     Bodies.rectangle(w / 2, -t / 2, w, t, { isStatic: true }),
     Bodies.rectangle(w / 2, h + t / 2, w, t, { isStatic: true }),
     Bodies.rectangle(-t / 2, h / 2, t, h, { isStatic: true }),
     Bodies.rectangle(w + t / 2, h / 2, t, h, { isStatic: true })
   ];
+
   Composite.add(engine.world, boundaryBodies);
 }
+
 function removeBoundaries() {
-  boundaryBodies.forEach(b => Composite.remove(engine.world, b));
+  boundaryBodies.forEach((b) => Composite.remove(engine.world, b));
   boundaryBodies = [];
 }
+
 addBoundaries();
-
-/* --------------- Invisible blocker behind title/subnav ------------- */
-let centerBody = null;
-function addCenterBlocker() {
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  const centerX = w / 2;
-  const centerY = h / 2;
-  const centerWidth  = Math.min(420, Math.max(240, w * 0.56));
-  const centerHeight = Math.min(140, Math.max(80,  h * 0.16));
-
-  centerBody = Bodies.rectangle(centerX, centerY, centerWidth, centerHeight, {
-    isStatic: true,
-    render: { visible: false }
-  });
-  Composite.add(engine.world, centerBody);
-}
-function removeCenterBlocker() {
-  if (centerBody) {
-    Composite.remove(engine.world, centerBody);
-    centerBody = null;
-  }
-}
-addCenterBlocker();
 
 /* -------------------- Directories (bubbles) ------------------------ */
 const directories = [
@@ -120,9 +112,8 @@ const minSide = Math.min(window.innerWidth, window.innerHeight);
 const circleRadius = Math.round(Math.max(44, Math.min(baseRadius, minSide * 0.08)));
 
 directories.forEach((dir, i) => {
-  // Only show color if this session was "enabled" by a user click
   const showColor = enableVisitedColors && visited.includes(dir.label);
-  const fillColor = showColor ? colorPalette[i % colorPalette.length] : "#ffffff";
+  const fillColor = showColor ? colorPalette[i % colorPalette.length] : "#FFFFFF";
 
   const circle = Bodies.circle(
     Math.random() * (window.innerWidth - 2 * circleRadius) + circleRadius,
@@ -138,9 +129,12 @@ directories.forEach((dir, i) => {
       }
     }
   );
+
   circle.directory = dir;
+  circle.originalColor = fillColor;
   circles.push(circle);
 });
+
 Composite.add(engine.world, circles);
 
 /* -------------------- Mouse / Touch controls ----------------------- */
@@ -149,35 +143,69 @@ const mouseConstraint = MouseConstraint.create(engine, {
   mouse,
   constraint: { stiffness: 0.2, render: { visible: false } }
 });
+
 Composite.add(engine.world, mouseConstraint);
 render.mouse = mouse;
 
 // Click / Tap navigation + mark visited + enable color for future returns
 function handleActivate() {
   const mousePos = mouse.position;
+
   for (let circle of circles) {
     const dx = mousePos.x - circle.position.x;
     const dy = mousePos.y - circle.position.y;
+
     if (Math.hypot(dx, dy) <= circleRadius) {
       const label = circle.directory.label;
 
-      // Persist visited
       if (!visited.includes(label)) {
         visited.push(label);
-        try { localStorage.setItem(VISITED_KEY, JSON.stringify(visited)); } catch (_) {}
+        try {
+          localStorage.setItem(VISITED_KEY, JSON.stringify(visited));
+        } catch (_) {}
       }
 
-      // Enable coloring on future loads in THIS session
       sessionStorage.setItem(COLOR_FLAG, "1");
-
-      // Navigate
       window.location.href = circle.directory.link;
       return;
     }
   }
 }
+
 render.canvas.addEventListener("click", handleActivate, { passive: true });
 render.canvas.addEventListener("pointerup", handleActivate, { passive: true });
+
+/* ---------------------- Collision color invert --------------------- */
+// Prevents rapid flicker from repeated collision frames
+const collisionCooldown = new Map();
+const COLLISION_COOLDOWN_MS = 180;
+
+function pairKey(idA, idB) {
+  return idA < idB ? `${idA}-${idB}` : `${idB}-${idA}`;
+}
+
+Events.on(engine, "collisionStart", (event) => {
+  const now = Date.now();
+
+  event.pairs.forEach((pair) => {
+    const { bodyA, bodyB } = pair;
+
+    const aIsCircle = circles.includes(bodyA);
+    const bIsCircle = circles.includes(bodyB);
+
+    // Only react when two directory circles collide with each other
+    if (!aIsCircle || !bIsCircle) return;
+
+    const key = pairKey(bodyA.id, bodyB.id);
+    const lastTime = collisionCooldown.get(key) || 0;
+
+    if (now - lastTime < COLLISION_COOLDOWN_MS) return;
+    collisionCooldown.set(key, now);
+
+    bodyA.render.fillStyle = invertHexColor(bodyA.render.fillStyle);
+    bodyB.render.fillStyle = invertHexColor(bodyB.render.fillStyle);
+  });
+});
 
 /* -------------------------- Labels ------------------------------- */
 Events.on(render, "afterRender", () => {
@@ -185,8 +213,11 @@ Events.on(render, "afterRender", () => {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.font = "20px 'Helvetica Neue', Arial, sans-serif";
-  ctx.fillStyle = "#000000";
-  circles.forEach(circle => {
+
+  circles.forEach((circle) => {
+    // make label readable on both light and dark fills
+    const fill = circle.render.fillStyle.toUpperCase();
+    ctx.fillStyle = fill === "#FFFFFF" || fill === "#FFFF00" ? "#000000" : "#FFFFFF";
     ctx.fillText(circle.directory.label, circle.position.x, circle.position.y);
   });
 });
@@ -209,8 +240,6 @@ function resize() {
 
   removeBoundaries();
   addBoundaries();
-  removeCenterBlocker();
-  addCenterBlocker();
 }
 
 window.addEventListener("resize", resize);
