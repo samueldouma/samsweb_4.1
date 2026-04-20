@@ -15,20 +15,21 @@ const render = Render.create({
   }
 });
 
-// crisp on mobile without scaling the world
 Matter.Render.setPixelRatio(render, Math.max(1, window.devicePixelRatio || 1));
 
 /* ------------------------------------------------------------------ *
- * Visited memory + explicit "only color AFTER a click" session flag
+ * Session memory
  * ------------------------------------------------------------------ */
-const VISITED_KEY = "visitedBubbles_v2";
-const COLOR_FLAG = "enableVisitedColors_v1";
+const VISITED_KEY = "visitedBubbles_v3";
+const COLOR_FLAG = "enableVisitedColors_v2";
+const COLOR_MAP_KEY = "bubbleColorMap_v1";
 
 // Optional reset via URL: ?reset=1
 try {
   const u = new URL(window.location.href);
   if (u.searchParams.get("reset") === "1") {
     localStorage.removeItem(VISITED_KEY);
+    localStorage.removeItem(COLOR_MAP_KEY);
     sessionStorage.removeItem(COLOR_FLAG);
   }
 } catch (_) {}
@@ -42,9 +43,22 @@ try {
   visited = [];
 }
 
+let colorMap = {};
+try {
+  const raw = localStorage.getItem(COLOR_MAP_KEY);
+  colorMap = raw ? JSON.parse(raw) : {};
+  if (!colorMap || typeof colorMap !== "object" || Array.isArray(colorMap)) {
+    colorMap = {};
+  }
+} catch (_) {
+  colorMap = {};
+}
+
+// First load in a fresh session = all white.
+// After a user clicks a bubble and returns, visited bubbles show stored colors.
 const enableVisitedColors = sessionStorage.getItem(COLOR_FLAG) === "1";
 
-/* ---------------------- Colors (indexed palette) ------------------- */
+/* ---------------------- Colors (unique palette) -------------------- */
 const colorPalette = [
   "#FF0000", // Red
   "#FF7F00", // Orange
@@ -55,19 +69,33 @@ const colorPalette = [
   "#8B00FF"  // Violet
 ];
 
-// Invert a hex color like #RRGGBB
-function invertHexColor(hex) {
-  const clean = hex.replace("#", "");
-  const r = 255 - parseInt(clean.slice(0, 2), 16);
-  const g = 255 - parseInt(clean.slice(2, 4), 16);
-  const b = 255 - parseInt(clean.slice(4, 6), 16);
+function getUnusedColors() {
+  const used = new Set(Object.values(colorMap));
+  return colorPalette.filter(color => !used.has(color));
+}
 
-  return (
-    "#" +
-    r.toString(16).padStart(2, "0") +
-    g.toString(16).padStart(2, "0") +
-    b.toString(16).padStart(2, "0")
-  ).toUpperCase();
+function pickUniqueColor() {
+  const unused = getUnusedColors();
+
+  // Until all colors are used, avoid duplicates.
+  if (unused.length > 0) {
+    return unused[Math.floor(Math.random() * unused.length)];
+  }
+
+  // Once all palette colors are used, allow reuse.
+  return colorPalette[Math.floor(Math.random() * colorPalette.length)];
+}
+
+function saveVisited() {
+  try {
+    localStorage.setItem(VISITED_KEY, JSON.stringify(visited));
+  } catch (_) {}
+}
+
+function saveColorMap() {
+  try {
+    localStorage.setItem(COLOR_MAP_KEY, JSON.stringify(colorMap));
+  } catch (_) {}
 }
 
 /* --------------------------- Boundaries ---------------------------- */
@@ -95,7 +123,7 @@ function removeBoundaries() {
 
 addBoundaries();
 
-/* -------------------- Directories (bubbles) ------------------------ */
+/* ----------------------- Directories / bubbles --------------------- */
 const directories = [
   { label: "Audio",  link: "audio.html"  },
   { label: "Video",  link: "video.html"  },
@@ -111,9 +139,10 @@ const baseRadius = 60;
 const minSide = Math.min(window.innerWidth, window.innerHeight);
 const circleRadius = Math.round(Math.max(44, Math.min(baseRadius, minSide * 0.08)));
 
-directories.forEach((dir, i) => {
+directories.forEach((dir) => {
   const showColor = enableVisitedColors && visited.includes(dir.label);
-  const fillColor = showColor ? colorPalette[i % colorPalette.length] : "#FFFFFF";
+  const storedColor = colorMap[dir.label];
+  const fillColor = showColor && storedColor ? storedColor : "#FFFFFF";
 
   const circle = Bodies.circle(
     Math.random() * (window.innerWidth - 2 * circleRadius) + circleRadius,
@@ -122,6 +151,7 @@ directories.forEach((dir, i) => {
     {
       restitution: 0.9,
       friction: 0.005,
+      frictionAir: 0.002,
       render: {
         fillStyle: fillColor,
         strokeStyle: "#000000",
@@ -131,7 +161,6 @@ directories.forEach((dir, i) => {
   );
 
   circle.directory = dir;
-  circle.originalColor = fillColor;
   circles.push(circle);
 });
 
@@ -147,25 +176,31 @@ const mouseConstraint = MouseConstraint.create(engine, {
 Composite.add(engine.world, mouseConstraint);
 render.mouse = mouse;
 
-// Click / Tap navigation + mark visited + enable color for future returns
 function handleActivate() {
   const mousePos = mouse.position;
 
-  for (let circle of circles) {
+  for (const circle of circles) {
     const dx = mousePos.x - circle.position.x;
     const dy = mousePos.y - circle.position.y;
 
     if (Math.hypot(dx, dy) <= circleRadius) {
       const label = circle.directory.label;
 
+      // Mark visited once
       if (!visited.includes(label)) {
         visited.push(label);
-        try {
-          localStorage.setItem(VISITED_KEY, JSON.stringify(visited));
-        } catch (_) {}
+        saveVisited();
       }
 
+      // Assign this specific bubble a persistent unique color once
+      if (!colorMap[label]) {
+        colorMap[label] = pickUniqueColor();
+        saveColorMap();
+      }
+
+      // Enable showing visited colors when user returns to homepage in this session
       sessionStorage.setItem(COLOR_FLAG, "1");
+
       window.location.href = circle.directory.link;
       return;
     }
@@ -175,8 +210,25 @@ function handleActivate() {
 render.canvas.addEventListener("click", handleActivate, { passive: true });
 render.canvas.addEventListener("pointerup", handleActivate, { passive: true });
 
-/* ---------------------- Collision color invert --------------------- */
-// Prevents rapid flicker from repeated collision frames
+/* ---------------- Collision-based temporary color inversion -------- */
+// You said the flickering grew on you, so this stays.
+// It affects live display during collisions, but persistent visited colors
+// still come only from actual clicked pages.
+
+function invertHexColor(hex) {
+  const clean = hex.replace("#", "");
+  const r = 255 - parseInt(clean.slice(0, 2), 16);
+  const g = 255 - parseInt(clean.slice(2, 4), 16);
+  const b = 255 - parseInt(clean.slice(4, 6), 16);
+
+  return (
+    "#" +
+    r.toString(16).padStart(2, "0") +
+    g.toString(16).padStart(2, "0") +
+    b.toString(16).padStart(2, "0")
+  ).toUpperCase();
+}
+
 const collisionCooldown = new Map();
 const COLLISION_COOLDOWN_MS = 180;
 
@@ -193,7 +245,6 @@ Events.on(engine, "collisionStart", (event) => {
     const aIsCircle = circles.includes(bodyA);
     const bIsCircle = circles.includes(bodyB);
 
-    // Only react when two directory circles collide with each other
     if (!aIsCircle || !bIsCircle) return;
 
     const key = pairKey(bodyA.id, bodyB.id);
@@ -207,7 +258,7 @@ Events.on(engine, "collisionStart", (event) => {
   });
 });
 
-/* -------------------------- Labels ------------------------------- */
+/* -------------------------- Labels -------------------------------- */
 Events.on(render, "afterRender", () => {
   const ctx = render.context;
   ctx.textAlign = "center";
@@ -215,18 +266,17 @@ Events.on(render, "afterRender", () => {
   ctx.font = "20px 'Helvetica Neue', Arial, sans-serif";
 
   circles.forEach((circle) => {
-    // make label readable on both light and dark fills
     const fill = circle.render.fillStyle.toUpperCase();
-    ctx.fillStyle = fill === "#FFFFFF" || fill === "#FFFF00" ? "#000000" : "#FFFFFF";
+    ctx.fillStyle = fill === "#FFFFFF" || fill === "#FFFF00" ? "#000000" : "#000000";
     ctx.fillText(circle.directory.label, circle.position.x, circle.position.y);
   });
 });
 
-/* --------------------------- Run -------------------------------- */
+/* --------------------------- Run ---------------------------------- */
 Render.run(render);
 Runner.run(Runner.create(), engine);
 
-/* -------------------------- Resize ------------------------------- */
+/* -------------------------- Resize -------------------------------- */
 function resize() {
   const w = window.innerWidth;
   const h = window.innerHeight;
