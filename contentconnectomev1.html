@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Keyword Atlas Prototype</title>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: "Karla", sans-serif;
+      background: #000;
+      color: #fff;
+    }
+
+    #app {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      width: 100%;
+      height: 100%;
+      background: #000;
+    }
+
+    #panel {
+      background: #050505;
+      border-right: 1px solid #1c1c1c;
+      padding: 18px 18px 24px 18px;
+      overflow-y: auto;
+    }
+
+    #panel h2 {
+      margin: 0 0 8px 0;
+      font-size: 21px;
+      line-height: 1.05;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    #panel .meta {
+      font-size: 12px;
+      color: #9a9a9a;
+      margin-bottom: 12px;
+      line-height: 1.45;
+    }
+
+    #panel .doc {
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      color: #eaeaea;
+    }
+
+    #panel mark {
+      background: #fff;
+      color: #000;
+      padding: 0 2px;
+      border-radius: 2px;
+    }
+
+    #panel .hint {
+      color: #888;
+      font-size: 13px;
+      line-height: 1.55;
+      margin-top: 8px;
+    }
+
+    #graph-wrap {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #000;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background:
+        radial-gradient(circle at center, #090909 0%, #000 72%);
+      touch-action: none;
+    }
+
+    .link {
+      stroke: #2d2d2d;
+      stroke-opacity: 0.55;
+      transition: stroke 0.2s, stroke-opacity 0.2s, stroke-width 0.2s;
+    }
+
+    .link.active {
+      stroke: #cfcfcf;
+      stroke-opacity: 0.95;
+      stroke-width: 2px;
+    }
+
+    .node circle {
+      fill: #6f6f6f;
+      transition: fill 0.2s, r 0.2s, stroke 0.2s, stroke-width 0.2s, opacity 0.2s;
+      cursor: pointer;
+    }
+
+    .node text {
+      font-size: 12px;
+      fill: #9f9f9f;
+      pointer-events: none;
+      user-select: none;
+      transition: opacity 0.2s, fill 0.2s;
+    }
+
+    .node.dim circle,
+    .node.dim text {
+      opacity: 0.13;
+    }
+
+    .node.neighbor text,
+    .node.active text,
+    .node.hovered text {
+      fill: #f1f1f1;
+    }
+
+    .node.active circle {
+      stroke: #fff;
+      stroke-width: 1.8px;
+    }
+
+    .node.hovered circle {
+      stroke: #bdbdbd;
+      stroke-width: 1.4px;
+    }
+
+    #legend {
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      background: rgba(0,0,0,0.88);
+      border: 1px solid #222;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 12px;
+      line-height: 1.45;
+      color: #9d9d9d;
+      max-width: 250px;
+    }
+
+    #legend strong {
+      color: #fff;
+    }
+
+    #topbar {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid #2a2a2a;
+      background: #0b0b0b;
+      color: #d7d7d7;
+      padding: 8px 10px;
+      border-radius: 999px;
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      border-color: #555;
+      color: #fff;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <aside id="panel">
+      <h2>Keyword Atlas</h2>
+      <div class="meta">Black/white prototype. Hover or tap to preview. Click to select and pull related nodes inward.</div>
+      <div class="doc hint">
+        Visited nodes keep their own grayscale history state.<br><br>
+        Only the node you visit changes tone.<br><br>
+        When all nodes have been visited, all nodes retain distinct grayscale tones.
+      </div>
+    </aside>
+
+    <div id="graph-wrap">
+      <div id="topbar">
+        <button class="btn" id="resetViewBtn">Reset view</button>
+        <button class="btn" id="clearHistoryBtn">Clear history</button>
+      </div>
+
+      <svg id="graph"></svg>
+
+      <div id="legend">
+        <strong>Controls</strong><br>
+        Hover/tap: preview document<br>
+        Click: toggle active node<br>
+        Drag: reposition a node<br>
+        Wheel / pinch: zoom<br>
+        Clear history: remove visited-tone memory
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const data = {
+      nodes: [
+        {
+          id: "attention",
+          group: "concept",
+          size: 22,
+          keywords: ["attention", "focus", "salience"],
+          doc: "Attention is a selective process. It governs which inputs become foregrounded and which remain peripheral. In a digital environment, attention is repeatedly captured by salience cues, interruption loops, and novelty pressure."
+        },
+        {
+          id: "algorithms",
+          group: "system",
+          size: 20,
+          keywords: ["algorithm", "ranking", "optimization"],
+          doc: "Algorithms rank, sort, and prioritize content. In platform systems, ranking often follows engagement optimization rather than truth or human flourishing. This produces feedback between user behavior and system output."
+        },
+        {
+          id: "surveillance",
+          group: "system",
+          size: 18,
+          keywords: ["surveillance", "tracking", "metadata"],
+          doc: "Surveillance systems collect behavioral traces: clicks, dwell time, location, metadata, and patterns of interaction. These traces are transformed into prediction inputs and commercial intelligence."
+        },
+        {
+          id: "addiction",
+          group: "effect",
+          size: 16,
+          keywords: ["addiction", "compulsion", "dopamine"],
+          doc: "Compulsive media use can emerge through intermittent reinforcement, personalized novelty, and emotional volatility. This does not need to be chemically addictive to become behaviorally dominant."
+        },
+        {
+          id: "education",
+          group: "domain",
+          size: 18,
+          keywords: ["education", "learning", "curriculum"],
+          doc: "Educational systems increasingly compete with fragmented digital attention. A meaningful knowledge tool should support depth, retrieval, relation, and long-form synthesis rather than fragmentation."
+        },
+        {
+          id: "memory",
+          group: "concept",
+          size: 17,
+          keywords: ["memory", "encoding", "retrieval"],
+          doc: "Memory is shaped by repetition, salience, association, and retrieval practice. Connected knowledge graphs can support memory by making conceptual relationships visible and navigable."
+        },
+        {
+          id: "journalism",
+          group: "domain",
+          size: 15,
+          keywords: ["journalism", "investigation", "publics"],
+          doc: "Journalism can map opaque systems into intelligible structures. A graph interface can help organize sources, claims, institutions, events, and conceptual frames inside one investigative environment."
+        },
+        {
+          id: "philosophy",
+          group: "domain",
+          size: 15,
+          keywords: ["philosophy", "ethics", "epistemology"],
+          doc: "Philosophy helps clarify category errors, causal claims, and normative assumptions. In technological systems, it is useful for distinguishing optimization from value, intelligence from judgment, and signal from meaning."
+        },
+        {
+          id: "neuroscience",
+          group: "domain",
+          size: 16,
+          keywords: ["brain", "neuroscience", "cognition"],
+          doc: "Neuroscience contributes models of salience, reward, habit formation, and attentional control. These become relevant when analyzing interface systems designed to repeatedly capture human cognition."
+        },
+        {
+          id: "interface",
+          group: "system",
+          size: 17,
+          keywords: ["interface", "design", "interaction"],
+          doc: "Interfaces are not neutral surfaces. They shape behavior through affordances, friction, hierarchy, animation, and pacing. Visual relation maps can make hidden conceptual structure more graspable."
+        },
+        {
+          id: "archive",
+          group: "object",
+          size: 16,
+          keywords: ["archive", "storage", "index"],
+          doc: "An archive is not just storage. It is an ordering system. Its usefulness depends on retrieval, relation, visibility, and the ability to recontextualize fragments into larger structures."
+        },
+        {
+          id: "agency",
+          group: "effect",
+          size: 15,
+          keywords: ["agency", "autonomy", "control"],
+          doc: "Agency weakens when a subject loses the ability to direct attention, interpret cause, and act deliberately. A good personal system should restore orientation rather than intensify overload."
+        }
+      ],
+      links: [
+        { source: "attention", target: "algorithms", weight: 3 },
+        { source: "attention", target: "addiction", weight: 3 },
+        { source: "attention", target: "memory", weight: 2 },
+        { source: "attention", target: "neuroscience", weight: 2 },
+        { source: "attention", target: "education", weight: 2 },
+
+        { source: "algorithms", target: "surveillance", weight: 3 },
+        { source: "algorithms", target: "interface", weight: 2 },
+        { source: "algorithms", target: "addiction", weight: 2 },
+        { source: "algorithms", target: "journalism", weight: 1 },
+
+        { source: "surveillance", target: "journalism", weight: 2 },
+        { source: "surveillance", target: "philosophy", weight: 1 },
+        { source: "surveillance", target: "agency", weight: 2 },
+
+        { source: "education", target: "memory", weight: 2 },
+        { source: "education", target: "archive", weight: 2 },
+        { source: "education", target: "interface", weight: 1 },
+
+        { source: "journalism", target: "archive", weight: 2 },
+        { source: "journalism", target: "philosophy", weight: 1 },
+
+        { source: "philosophy", target: "agency", weight: 2 },
+        { source: "neuroscience", target: "addiction", weight: 2 },
+        { source: "neuroscience", target: "memory", weight: 2 },
+        { source: "interface", target: "agency", weight: 1 },
+        { source: "archive", target: "memory", weight: 1 }
+      ]
+    };
+
+    const HISTORY_KEY = "keyword-atlas-visited-tones-v1";
+
+    const grayscalePalette = [
+      "#f5f5f5", "#e8e8e8", "#d9d9d9", "#cccccc",
+      "#bebebe", "#b0b0b0", "#a3a3a3", "#969696",
+      "#8a8a8a", "#7d7d7d", "#707070", "#636363"
+    ];
+
+    let visitedToneMap = loadVisitedToneMap();
+    let activeNodeId = null;
+    let hoverNodeId = null;
+
+    const panel = document.getElementById("panel");
+    const graphWrap = document.getElementById("graph-wrap");
+    const svg = d3.select("#graph");
+
+    let graphWidth = graphWrap.clientWidth;
+    let graphHeight = graphWrap.clientHeight;
+
+    const zoomLayer = svg.append("g");
+    const linkLayer = zoomLayer.append("g");
+    const nodeLayer = zoomLayer.append("g");
+
+    const zoomBehavior = d3.zoom()
+      .scaleExtent([0.35, 3])
+      .on("zoom", (event) => {
+        zoomLayer.attr("transform", event.transform);
+      });
+
+    svg.call(zoomBehavior);
+
+    const adjacency = new Map();
+    data.nodes.forEach(n => adjacency.set(n.id, new Set()));
+    data.links.forEach(l => {
+      adjacency.get(l.source).add(l.target);
+      adjacency.get(l.target).add(l.source);
+    });
+
+    const simulation = d3.forceSimulation(data.nodes)
+      .force("link", d3.forceLink(data.links).id(d => d.id).distance(d => 124 - d.weight * 12).strength(0.18))
+      .force("charge", d3.forceManyBody().strength(-225))
+      .force("center", d3.forceCenter(graphWidth / 2, graphHeight / 2))
+      .force("collide", d3.forceCollide().radius(d => d.size + 18))
+      .force("x", d3.forceX(graphWidth / 2).strength(0.015))
+      .force("y", d3.forceY(graphHeight / 2).strength(0.015));
+
+    const link = linkLayer
+      .selectAll("line")
+      .data(data.links)
+      .enter()
+      .append("line")
+      .attr("class", "link")
+      .attr("stroke-width", d => 0.8 + d.weight * 0.35);
+
+    const node = nodeLayer
+      .selectAll("g")
+      .data(data.nodes)
+      .enter()
+      .append("g")
+      .attr("class", "node")
+      .call(drag(simulation));
+
+    node.append("circle")
+      .attr("r", d => d.size);
+
+    node.append("text")
+      .attr("dx", d => d.size + 6)
+      .attr("dy", 4)
+      .text(d => d.id);
+
+    node
+      .on("mouseover", function(event, d) {
+        hoverNodeId = d.id;
+        renderPanel(d, activeNodeId);
+        updateStyles();
+      })
+      .on("mouseout", function() {
+        hoverNodeId = null;
+        renderPanel(
+          activeNodeId ? data.nodes.find(n => n.id === activeNodeId) : null,
+          activeNodeId
+        );
+        updateStyles();
+      })
+      .on("click", function(event, d) {
+        markVisited(d.id);
+        activeNodeId = activeNodeId === d.id ? null : d.id;
+        applyActiveForces();
+        renderPanel(d, activeNodeId);
+        updateStyles();
+      })
+      .on("touchstart", function(event, d) {
+        event.preventDefault();
+        markVisited(d.id);
+        hoverNodeId = d.id;
+        renderPanel(d, activeNodeId);
+        updateStyles();
+      });
+
+    simulation.on("tick", () => {
+      link
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+
+      node.attr("transform", d => `translate(${d.x},${d.y})`);
+    });
+
+    document.getElementById("resetViewBtn").addEventListener("click", () => {
+      svg.transition().duration(350).call(
+        zoomBehavior.transform,
+        d3.zoomIdentity
+      );
+    });
+
+    document.getElementById("clearHistoryBtn").addEventListener("click", () => {
+      visitedToneMap = {};
+      localStorage.removeItem(HISTORY_KEY);
+      updateStyles();
+    });
+
+    function loadVisitedToneMap() {
+      try {
+        const raw = localStorage.getItem(HISTORY_KEY);
+        return raw ? JSON.parse(raw) : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function saveVisitedToneMap() {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(visitedToneMap));
+    }
+
+    function markVisited(nodeId) {
+      if (!visitedToneMap[nodeId]) {
+        const unassignedTones = grayscalePalette.filter(
+          tone => !Object.values(visitedToneMap).includes(tone)
+        );
+
+        const tone = unassignedTones.length
+          ? unassignedTones[Object.keys(visitedToneMap).length % unassignedTones.length]
+          : grayscalePalette[Object.keys(visitedToneMap).length % grayscalePalette.length];
+
+        visitedToneMap[nodeId] = tone;
+        saveVisitedToneMap();
+      }
+    }
+
+    function allNodesVisited() {
+      return data.nodes.every(n => !!visitedToneMap[n.id]);
+    }
+
+    function getNodeBaseFill(d) {
+      const defaultFill = "#6b6b6b";
+      const visitedFill = visitedToneMap[d.id];
+
+      if (allNodesVisited()) {
+        return visitedFill || defaultFill;
+      }
+
+      return visitedFill ? visitedFill : defaultFill;
+    }
+
+    function applyActiveForces() {
+      if (!activeNodeId) {
+        simulation.force("clusterX", null);
+        simulation.force("clusterY", null);
+        simulation.alpha(0.9).restart();
+        return;
+      }
+
+      const active = data.nodes.find(n => n.id === activeNodeId);
+      const neighbors = adjacency.get(activeNodeId);
+
+      simulation.force("clusterX", d3.forceX(d => {
+        if (d.id === activeNodeId) return active.x || graphWidth / 2;
+        if (neighbors.has(d.id)) return active.x || graphWidth / 2;
+        return graphWidth / 2;
+      }).strength(d => {
+        if (d.id === activeNodeId) return 0.45;
+        if (neighbors.has(d.id)) return 0.18;
+        return 0.01;
+      }));
+
+      simulation.force("clusterY", d3.forceY(d => {
+        if (d.id === activeNodeId) return active.y || graphHeight / 2;
+        if (neighbors.has(d.id)) return active.y || graphHeight / 2;
+        return graphHeight / 2;
+      }).strength(d => {
+        if (d.id === activeNodeId) return 0.45;
+        if (neighbors.has(d.id)) return 0.18;
+        return 0.01;
+      }));
+
+      simulation.alpha(1).restart();
+    }
+
+    function updateStyles() {
+      const focusId = hoverNodeId || activeNodeId;
+
+      node.each(function(d) {
+        const el = d3.select(this);
+        const isActive = activeNodeId === d.id;
+        const isHovered = hoverNodeId === d.id;
+        const isNeighbor = focusId && adjacency.get(focusId).has(d.id);
+        const isFocused = focusId === d.id;
+
+        el.classed("active", isActive);
+        el.classed("hovered", isHovered);
+        el.classed("neighbor", !!isNeighbor);
+
+        if (!focusId) {
+          el.classed("dim", false);
+        } else {
+          el.classed("dim", !(isFocused || isNeighbor));
+        }
+
+        el.select("circle")
+          .attr("fill", getNodeBaseFill(d));
+      });
+
+      link
+        .classed("active", d => {
+          if (!focusId) return false;
+          const a = d.source.id || d.source;
+          const b = d.target.id || d.target;
+          return a === focusId || b === focusId;
+        })
+        .attr("stroke-opacity", d => {
+          if (!focusId) return 0.55;
+          const a = d.source.id || d.source;
+          const b = d.target.id || d.target;
+          return (a === focusId || b === focusId) ? 0.95 : 0.07;
+        });
+
+      if (focusId) {
+        node.each(function(d) {
+          const el = d3.select(this);
+          const circle = el.select("circle");
+          const isFocused = focusId === d.id;
+          const isNeighbor = adjacency.get(focusId).has(d.id);
+
+          if (isFocused) {
+            circle.attr("fill", "#ffffff");
+          } else if (isNeighbor) {
+            const base = getNodeBaseFill(d);
+            circle.attr("fill", brightenHex(base, 18));
+          }
+        });
+      }
+    }
+
+    function brightenHex(hex, amount) {
+      const {r, g, b} = hexToRgb(hex);
+      return rgbToHex(
+        Math.min(255, r + amount),
+        Math.min(255, g + amount),
+        Math.min(255, b + amount)
+      );
+    }
+
+    function hexToRgb(hex) {
+      const clean = hex.replace("#", "");
+      const bigint = parseInt(clean, 16);
+      return {
+        r: (bigint >> 16) & 255,
+        g: (bigint >> 8) & 255,
+        b: bigint & 255
+      };
+    }
+
+    function rgbToHex(r, g, b) {
+      return "#" + [r, g, b].map(v => v.toString(16).padStart(2, "0")).join("");
+    }
+
+    function renderPanel(nodeData, selectedId) {
+      if (!nodeData) {
+        panel.innerHTML = `
+          <h2>Keyword Atlas</h2>
+          <div class="meta">Black/white prototype. Hover or tap to preview. Click to select and pull related nodes inward.</div>
+          <div class="doc hint">
+            Visited nodes keep their own grayscale history state.<br><br>
+            Only the node you visit changes tone.<br><br>
+            When all nodes have been visited, all nodes retain distinct grayscale tones.
+          </div>
+        `;
+        return;
+      }
+
+      const connected = [...adjacency.get(nodeData.id)];
+      const highlighted = highlightTerms(nodeData.doc, nodeData.keywords);
+      const visited = !!visitedToneMap[nodeData.id];
+
+      panel.innerHTML = `
+        <h2>${nodeData.id}</h2>
+        <div class="meta">
+          group: ${nodeData.group} · keywords: ${nodeData.keywords.join(", ")}<br>
+          connected nodes: ${connected.length}${selectedId === nodeData.id ? " · selected" : ""}${visited ? " · visited" : ""}
+        </div>
+        <div class="doc">${highlighted}</div>
+      `;
+    }
+
+    function escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    function highlightTerms(text, terms) {
+      let result = text;
+      const sorted = [...terms].sort((a, b) => b.length - a.length);
+
+      sorted.forEach(term => {
+        const regex = new RegExp(`\\b(${escapeRegExp(term)})\\b`, "gi");
+        result = result.replace(regex, "<mark>$1</mark>");
+      });
+
+      return result;
+    }
+
+    function drag(sim) {
+      function dragstarted(event, d) {
+        if (!event.active) sim.alphaTarget(0.25).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+      }
+
+      function dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+      }
+
+      function dragended(event, d) {
+        if (!event.active) sim.alphaTarget(0);
+      }
+
+      return d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended);
+    }
+
+    function resizeGraph() {
+      graphWidth = graphWrap.clientWidth;
+      graphHeight = graphWrap.clientHeight;
+
+      simulation.force("center", d3.forceCenter(graphWidth / 2, graphHeight / 2));
+      simulation.force("x", d3.forceX(graphWidth / 2).strength(0.015));
+      simulation.force("y", d3.forceY(graphHeight / 2).strength(0.015));
+      simulation.alpha(0.55).restart();
+    }
+
+    window.addEventListener("resize", resizeGraph);
+
+    updateStyles();
+  </script>
+</body>
+</html>
