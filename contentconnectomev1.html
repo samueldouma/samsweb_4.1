@@ -11,209 +11,318 @@
   <style>
     * { box-sizing: border-box; }
 
+    :root {
+      --bg: #000;
+      --panel: #050505;
+      --panel2: #0a0a0a;
+      --border: #1c1c1c;
+      --border2: #2b2b2b;
+      --text: #f1f1f1;
+      --muted: #9a9a9a;
+      --muted2: #777;
+      --link: #2f2f2f;
+      --linkActive: #dadada;
+    }
+
     html, body {
       margin: 0;
       width: 100%;
       height: 100%;
       overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
       font-family: "Karla", sans-serif;
-      background: #000;
-      color: #fff;
     }
 
     #app {
-      display: grid;
-      grid-template-columns: 360px 1fr;
       width: 100%;
       height: 100%;
-      background: #000;
+      display: grid;
+      grid-template-columns: 560px 1fr;
+      background: var(--bg);
     }
 
     #panel {
-      background: #050505;
-      border-right: 1px solid #1c1c1c;
-      padding: 18px 18px 24px 18px;
+      background: var(--panel);
+      border-right: 1px solid var(--border);
       overflow-y: auto;
+      min-width: 0;
+      min-height: 0;
     }
 
-    #panel h2 {
-      margin: 0 0 8px 0;
-      font-size: 21px;
-      line-height: 1.05;
+    .panel-inner {
+      padding: 18px 18px 28px;
+    }
+
+    .panel-top {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--border2);
+      background: var(--panel2);
+      color: #d8d8d8;
+      padding: 9px 12px;
+      border-radius: 999px;
+      font: inherit;
+      font-size: 12px;
+      line-height: 1;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      transition: border-color .15s, color .15s, background .15s, transform .05s;
+    }
+
+    .btn:hover {
+      border-color: #595959;
+      color: #fff;
+      background: #111;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    h2 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      line-height: 1.02;
+      letter-spacing: -0.03em;
       font-weight: 700;
-      letter-spacing: -0.02em;
       color: #fff;
     }
 
-    #panel .meta {
+    .meta {
       font-size: 12px;
-      color: #9a9a9a;
-      margin-bottom: 12px;
       line-height: 1.45;
+      color: var(--muted);
+      margin-bottom: 14px;
     }
 
-    #panel .doc {
-      font-size: 14px;
-      line-height: 1.6;
+    .doc {
+      font-size: 15px;
+      line-height: 1.66;
+      color: #ececec;
       white-space: pre-wrap;
-      color: #eaeaea;
     }
 
-    #panel mark {
+    .hint {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--muted2);
+      margin-top: 6px;
+    }
+
+    mark {
       background: #fff;
       color: #000;
       padding: 0 2px;
       border-radius: 2px;
     }
 
-    #panel .hint {
-      color: #888;
-      font-size: 13px;
-      line-height: 1.55;
-      margin-top: 8px;
-    }
-
     #graph-wrap {
       position: relative;
-      width: 100%;
-      height: 100%;
-      background: #000;
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+      background: var(--bg);
     }
 
-    svg {
+    #graph {
       width: 100%;
       height: 100%;
       display: block;
-      background:
-        radial-gradient(circle at center, #090909 0%, #000 72%);
+      background: radial-gradient(circle at center, #0a0a0a 0%, #000 72%);
       touch-action: none;
     }
 
-    .link {
-      stroke: #2d2d2d;
-      stroke-opacity: 0.55;
-      transition: stroke 0.2s, stroke-opacity 0.2s, stroke-width 0.2s;
-    }
-
-    .link.active {
-      stroke: #cfcfcf;
-      stroke-opacity: 0.95;
-      stroke-width: 2px;
-    }
-
-    .node circle {
-      fill: #6f6f6f;
-      transition: fill 0.2s, r 0.2s, stroke 0.2s, stroke-width 0.2s, opacity 0.2s;
-      cursor: pointer;
-    }
-
-    .node text {
-      font-size: 12px;
-      fill: #9f9f9f;
-      pointer-events: none;
-      user-select: none;
-      transition: opacity 0.2s, fill 0.2s;
-    }
-
-    .node.dim circle,
-    .node.dim text {
-      opacity: 0.13;
-    }
-
-    .node.neighbor text,
-    .node.active text,
-    .node.hovered text {
-      fill: #f1f1f1;
-    }
-
-    .node.active circle {
-      stroke: #fff;
-      stroke-width: 1.8px;
-    }
-
-    .node.hovered circle {
-      stroke: #bdbdbd;
-      stroke-width: 1.4px;
-    }
-
-    #legend {
-      position: absolute;
-      right: 12px;
-      top: 12px;
-      background: rgba(0,0,0,0.88);
-      border: 1px solid #222;
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-size: 12px;
-      line-height: 1.45;
-      color: #9d9d9d;
-      max-width: 250px;
-    }
-
-    #legend strong {
-      color: #fff;
-    }
-
-    #topbar {
+    #graph-topbar {
       position: absolute;
       left: 12px;
       top: 12px;
       display: flex;
       gap: 8px;
-      align-items: center;
-      z-index: 10;
+      flex-wrap: wrap;
+      z-index: 20;
     }
 
-    .btn {
+    #searchWrap {
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      z-index: 20;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    #searchInput {
+      width: 280px;
+      max-width: 42vw;
       appearance: none;
-      border: 1px solid #2a2a2a;
-      background: #0b0b0b;
-      color: #d7d7d7;
-      padding: 8px 10px;
+      border: 1px solid #2b2b2b;
+      background: rgba(8, 8, 8, 0.95);
+      color: #f2f2f2;
+      padding: 11px 14px;
       border-radius: 999px;
       font: inherit;
-      font-size: 12px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    #searchInput::placeholder {
+      color: #7b7b7b;
+    }
+
+    #searchInput:focus {
+      border-color: #6b6b6b;
+    }
+
+    .link {
+      stroke: var(--link);
+      stroke-opacity: .56;
+      transition: stroke .2s, stroke-opacity .2s, stroke-width .2s;
+    }
+
+    .link.active {
+      stroke: var(--linkActive);
+      stroke-opacity: .95;
+      stroke-width: 2px;
+    }
+
+    .node circle {
+      fill: #ffffff;
+      stroke: #ffffff;
+      stroke-width: 1px;
       cursor: pointer;
+      transition: fill .2s, stroke .2s, stroke-width .2s, opacity .2s, r .2s;
     }
 
-    .btn:hover {
-      border-color: #555;
-      color: #fff;
+    .node text {
+      font-size: 12px;
+      fill: #bcbcbc;
+      pointer-events: none;
+      user-select: none;
+      transition: fill .2s, opacity .2s;
     }
 
-    .btn:active {
-      transform: translateY(1px);
+    .node.dim circle,
+    .node.dim text {
+      opacity: .12;
+    }
+
+    .node.neighbor text,
+    .node.active text,
+    .node.hovered text {
+      fill: #ffffff;
+    }
+
+    @media (max-width: 900px) {
+      html, body {
+        overflow: hidden;
+      }
+
+      #app {
+        grid-template-columns: 1fr;
+        grid-template-rows: 50vh 50vh;
+      }
+
+      #graph-wrap {
+        order: 1;
+        border-bottom: 1px solid var(--border);
+      }
+
+      #panel {
+        order: 2;
+        border-right: none;
+        border-top: 1px solid var(--border);
+      }
+
+      .panel-inner {
+        padding: 16px 16px 24px;
+      }
+
+      h2 {
+        font-size: 24px;
+      }
+
+      #searchInput {
+        width: 190px;
+        max-width: 52vw;
+        font-size: 12px;
+        padding: 10px 12px;
+      }
+
+      .node text {
+        font-size: 11px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      #app {
+        grid-template-rows: 48vh 52vh;
+      }
+
+      #graph-topbar,
+      #searchWrap {
+        top: 10px;
+      }
+
+      #graph-topbar {
+        left: 10px;
+      }
+
+      #searchWrap {
+        right: 10px;
+      }
+
+      .btn {
+        padding: 8px 10px;
+        font-size: 11px;
+      }
+
+      #searchInput {
+        width: 150px;
+        font-size: 11px;
+      }
+
+      h2 {
+        font-size: 21px;
+      }
+
+      .meta {
+        font-size: 11px;
+      }
+
+      .doc {
+        font-size: 14px;
+      }
     }
   </style>
 </head>
 <body>
   <div id="app">
     <aside id="panel">
-      <h2>Keyword Atlas</h2>
-      <div class="meta">Black/white prototype. Hover or tap to preview. Click to select and pull related nodes inward.</div>
-      <div class="doc hint">
-        Visited nodes keep their own grayscale history state.<br><br>
-        Only the node you visit changes tone.<br><br>
-        When all nodes have been visited, all nodes retain distinct grayscale tones.
-      </div>
+      <div class="panel-inner" id="panelContent"></div>
     </aside>
 
     <div id="graph-wrap">
-      <div id="topbar">
-        <button class="btn" id="resetViewBtn">Reset view</button>
-        <button class="btn" id="clearHistoryBtn">Clear history</button>
+      <div id="graph-topbar">
+        <a class="btn" href="../index.html">Back to Cogito</a>
+        <button class="btn" id="resetViewBtn" type="button">Reset view</button>
+        <button class="btn" id="clearHistoryBtn" type="button">Clear history</button>
+      </div>
+
+      <div id="searchWrap">
+        <input id="searchInput" type="text" placeholder="Search documents, keywords, nodes" />
       </div>
 
       <svg id="graph"></svg>
-
-      <div id="legend">
-        <strong>Controls</strong><br>
-        Hover/tap: preview document<br>
-        Click: toggle active node<br>
-        Drag: reposition a node<br>
-        Wheel / pinch: zoom<br>
-        Clear history: remove visited-tone memory
-      </div>
     </div>
   </div>
 
@@ -311,23 +420,18 @@
         { source: "attention", target: "memory", weight: 2 },
         { source: "attention", target: "neuroscience", weight: 2 },
         { source: "attention", target: "education", weight: 2 },
-
         { source: "algorithms", target: "surveillance", weight: 3 },
         { source: "algorithms", target: "interface", weight: 2 },
         { source: "algorithms", target: "addiction", weight: 2 },
         { source: "algorithms", target: "journalism", weight: 1 },
-
         { source: "surveillance", target: "journalism", weight: 2 },
         { source: "surveillance", target: "philosophy", weight: 1 },
         { source: "surveillance", target: "agency", weight: 2 },
-
         { source: "education", target: "memory", weight: 2 },
         { source: "education", target: "archive", weight: 2 },
         { source: "education", target: "interface", weight: 1 },
-
         { source: "journalism", target: "archive", weight: 2 },
         { source: "journalism", target: "philosophy", weight: 1 },
-
         { source: "philosophy", target: "agency", weight: 2 },
         { source: "neuroscience", target: "addiction", weight: 2 },
         { source: "neuroscience", target: "memory", weight: 2 },
@@ -336,28 +440,38 @@
       ]
     };
 
-    const HISTORY_KEY = "keyword-atlas-visited-tones-v1";
-
-    const grayscalePalette = [
-      "#f5f5f5", "#e8e8e8", "#d9d9d9", "#cccccc",
-      "#bebebe", "#b0b0b0", "#a3a3a3", "#969696",
-      "#8a8a8a", "#7d7d7d", "#707070", "#636363"
-    ];
-
-    let visitedToneMap = loadVisitedToneMap();
+    const HISTORY_KEY = "keyword-atlas-black-history-v1";
+    let visitedMap = loadVisitedMap();
     let activeNodeId = null;
     let hoverNodeId = null;
+    let currentSearch = "";
 
-    const panel = document.getElementById("panel");
+    const panelContent = document.getElementById("panelContent");
     const graphWrap = document.getElementById("graph-wrap");
     const svg = d3.select("#graph");
-
-    let graphWidth = graphWrap.clientWidth;
-    let graphHeight = graphWrap.clientHeight;
+    const searchInput = document.getElementById("searchInput");
 
     const zoomLayer = svg.append("g");
     const linkLayer = zoomLayer.append("g");
     const nodeLayer = zoomLayer.append("g");
+
+    const adjacency = new Map();
+    data.nodes.forEach(n => adjacency.set(n.id, new Set()));
+    data.links.forEach(l => {
+      adjacency.get(l.source).add(l.target);
+      adjacency.get(l.target).add(l.source);
+    });
+
+    function getGraphSize() {
+      const rect = graphWrap.getBoundingClientRect();
+      return {
+        width: Math.max(320, rect.width),
+        height: Math.max(320, rect.height)
+      };
+    }
+
+    let { width, height } = getGraphSize();
+    svg.attr("viewBox", `0 0 ${width} ${height}`);
 
     const zoomBehavior = d3.zoom()
       .scaleExtent([0.35, 3])
@@ -367,20 +481,13 @@
 
     svg.call(zoomBehavior);
 
-    const adjacency = new Map();
-    data.nodes.forEach(n => adjacency.set(n.id, new Set()));
-    data.links.forEach(l => {
-      adjacency.get(l.source).add(l.target);
-      adjacency.get(l.target).add(l.source);
-    });
-
     const simulation = d3.forceSimulation(data.nodes)
       .force("link", d3.forceLink(data.links).id(d => d.id).distance(d => 124 - d.weight * 12).strength(0.18))
       .force("charge", d3.forceManyBody().strength(-225))
-      .force("center", d3.forceCenter(graphWidth / 2, graphHeight / 2))
-      .force("collide", d3.forceCollide().radius(d => d.size + 18))
-      .force("x", d3.forceX(graphWidth / 2).strength(0.015))
-      .force("y", d3.forceY(graphHeight / 2).strength(0.015));
+      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("collide", d3.forceCollide().radius(d => d.size + 20))
+      .force("x", d3.forceX(width / 2).strength(0.015))
+      .force("y", d3.forceY(height / 2).strength(0.015));
 
     const link = linkLayer
       .selectAll("line")
@@ -402,36 +509,45 @@
       .attr("r", d => d.size);
 
     node.append("text")
-      .attr("dx", d => d.size + 6)
+      .attr("dx", d => d.size + 8)
       .attr("dy", 4)
       .text(d => d.id);
 
     node
       .on("mouseover", function(event, d) {
         hoverNodeId = d.id;
-        renderPanel(d, activeNodeId);
+        renderPanel(d);
         updateStyles();
       })
       .on("mouseout", function() {
         hoverNodeId = null;
-        renderPanel(
-          activeNodeId ? data.nodes.find(n => n.id === activeNodeId) : null,
-          activeNodeId
-        );
+        if (activeNodeId) {
+          renderPanel(findNode(activeNodeId));
+        } else {
+          renderDefaultPanel();
+        }
         updateStyles();
       })
       .on("click", function(event, d) {
         markVisited(d.id);
         activeNodeId = activeNodeId === d.id ? null : d.id;
         applyActiveForces();
-        renderPanel(d, activeNodeId);
+        if (activeNodeId) {
+          centerOnNode(d);
+          renderPanel(d);
+        } else {
+          renderDefaultPanel();
+        }
         updateStyles();
       })
       .on("touchstart", function(event, d) {
         event.preventDefault();
         markVisited(d.id);
+        activeNodeId = d.id;
         hoverNodeId = d.id;
-        renderPanel(d, activeNodeId);
+        applyActiveForces();
+        centerOnNode(d);
+        renderPanel(d);
         updateStyles();
       });
 
@@ -446,19 +562,30 @@
     });
 
     document.getElementById("resetViewBtn").addEventListener("click", () => {
-      svg.transition().duration(350).call(
-        zoomBehavior.transform,
-        d3.zoomIdentity
-      );
+      svg.transition().duration(350).call(zoomBehavior.transform, d3.zoomIdentity);
     });
 
     document.getElementById("clearHistoryBtn").addEventListener("click", () => {
-      visitedToneMap = {};
+      visitedMap = {};
       localStorage.removeItem(HISTORY_KEY);
       updateStyles();
+      if (activeNodeId) renderPanel(findNode(activeNodeId));
+      else renderDefaultPanel();
     });
 
-    function loadVisitedToneMap() {
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") runSearch(searchInput.value);
+    });
+
+    searchInput.addEventListener("input", (e) => {
+      currentSearch = e.target.value.trim();
+      if (!currentSearch) {
+        if (activeNodeId) renderPanel(findNode(activeNodeId));
+        else renderDefaultPanel();
+      }
+    });
+
+    function loadVisitedMap() {
       try {
         const raw = localStorage.getItem(HISTORY_KEY);
         return raw ? JSON.parse(raw) : {};
@@ -467,38 +594,95 @@
       }
     }
 
-    function saveVisitedToneMap() {
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(visitedToneMap));
+    function saveVisitedMap() {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(visitedMap));
     }
 
     function markVisited(nodeId) {
-      if (!visitedToneMap[nodeId]) {
-        const unassignedTones = grayscalePalette.filter(
-          tone => !Object.values(visitedToneMap).includes(tone)
-        );
-
-        const tone = unassignedTones.length
-          ? unassignedTones[Object.keys(visitedToneMap).length % unassignedTones.length]
-          : grayscalePalette[Object.keys(visitedToneMap).length % grayscalePalette.length];
-
-        visitedToneMap[nodeId] = tone;
-        saveVisitedToneMap();
+      if (!visitedMap[nodeId]) {
+        visitedMap[nodeId] = true;
+        saveVisitedMap();
       }
     }
 
-    function allNodesVisited() {
-      return data.nodes.every(n => !!visitedToneMap[n.id]);
+    function findNode(id) {
+      return data.nodes.find(n => n.id === id);
     }
 
-    function getNodeBaseFill(d) {
-      const defaultFill = "#6b6b6b";
-      const visitedFill = visitedToneMap[d.id];
+    function isVisited(id) {
+      return !!visitedMap[id];
+    }
 
-      if (allNodesVisited()) {
-        return visitedFill || defaultFill;
+    function normalize(text) {
+      return text.toLowerCase().trim();
+    }
+
+    function scoreNode(nodeData, query) {
+      const q = normalize(query);
+      if (!q) return -1;
+
+      let score = 0;
+      const id = normalize(nodeData.id);
+      const keywords = nodeData.keywords.map(normalize);
+      const doc = normalize(nodeData.doc);
+
+      if (id === q) score += 100;
+      if (id.includes(q)) score += 40;
+
+      keywords.forEach(k => {
+        if (k === q) score += 50;
+        else if (k.includes(q)) score += 20;
+      });
+
+      if (doc.includes(q)) score += 15;
+
+      const words = q.split(/\s+/).filter(Boolean);
+      words.forEach(word => {
+        if (id.includes(word)) score += 10;
+        keywords.forEach(k => {
+          if (k.includes(word)) score += 8;
+        });
+        if (doc.includes(word)) score += 4;
+      });
+
+      return score;
+    }
+
+    function runSearch(query) {
+      const q = query.trim();
+      currentSearch = q;
+      if (!q) return;
+
+      let bestNode = null;
+      let bestScore = -1;
+
+      data.nodes.forEach(n => {
+        const s = scoreNode(n, q);
+        if (s > bestScore) {
+          bestScore = s;
+          bestNode = n;
+        }
+      });
+
+      if (!bestNode || bestScore <= 0) {
+        panelContent.innerHTML = `
+          <div class="panel-top">
+            <a class="btn" href="../index.html">Back to Cogito</a>
+          </div>
+          <h2>No result</h2>
+          <div class="meta">Search: ${escapeHtml(q)}</div>
+          <div class="doc hint">No node matched strongly enough. Try a keyword, node title, or a phrase from a document.</div>
+        `;
+        return;
       }
 
-      return visitedFill ? visitedFill : defaultFill;
+      markVisited(bestNode.id);
+      activeNodeId = bestNode.id;
+      hoverNodeId = null;
+      applyActiveForces();
+      renderPanel(bestNode);
+      updateStyles();
+      centerOnNode(bestNode);
     }
 
     function applyActiveForces() {
@@ -509,13 +693,13 @@
         return;
       }
 
-      const active = data.nodes.find(n => n.id === activeNodeId);
+      const active = findNode(activeNodeId);
       const neighbors = adjacency.get(activeNodeId);
 
       simulation.force("clusterX", d3.forceX(d => {
-        if (d.id === activeNodeId) return active.x || graphWidth / 2;
-        if (neighbors.has(d.id)) return active.x || graphWidth / 2;
-        return graphWidth / 2;
+        if (d.id === activeNodeId) return active.x || width / 2;
+        if (neighbors.has(d.id)) return active.x || width / 2;
+        return width / 2;
       }).strength(d => {
         if (d.id === activeNodeId) return 0.45;
         if (neighbors.has(d.id)) return 0.18;
@@ -523,9 +707,9 @@
       }));
 
       simulation.force("clusterY", d3.forceY(d => {
-        if (d.id === activeNodeId) return active.y || graphHeight / 2;
-        if (neighbors.has(d.id)) return active.y || graphHeight / 2;
-        return graphHeight / 2;
+        if (d.id === activeNodeId) return active.y || height / 2;
+        if (neighbors.has(d.id)) return active.y || height / 2;
+        return height / 2;
       }).strength(d => {
         if (d.id === activeNodeId) return 0.45;
         if (neighbors.has(d.id)) return 0.18;
@@ -535,28 +719,52 @@
       simulation.alpha(1).restart();
     }
 
+    function getNodeStyle(d, focusId) {
+      const focused = focusId === d.id;
+      const neighbor = focusId ? adjacency.get(focusId).has(d.id) : false;
+      const visited = isVisited(d.id);
+
+      let fill = "#ffffff";
+      let stroke = "#ffffff";
+      let strokeWidth = 1;
+
+      if (visited) {
+        fill = "#000000";
+        stroke = "#ffffff";
+        strokeWidth = 1.6;
+      }
+
+      if (focused) {
+        fill = "#000000";
+        stroke = "#ffffff";
+        strokeWidth = 2.2;
+      } else if (neighbor) {
+        fill = visited ? "#101010" : "#d8d8d8";
+        stroke = "#ffffff";
+        strokeWidth = 1.4;
+      }
+
+      return { fill, stroke, strokeWidth, focused, neighbor };
+    }
+
     function updateStyles() {
       const focusId = hoverNodeId || activeNodeId;
 
       node.each(function(d) {
         const el = d3.select(this);
-        const isActive = activeNodeId === d.id;
-        const isHovered = hoverNodeId === d.id;
-        const isNeighbor = focusId && adjacency.get(focusId).has(d.id);
-        const isFocused = focusId === d.id;
+        const style = getNodeStyle(d, focusId);
+        const isFocused = style.focused;
+        const isNeighbor = style.neighbor;
 
-        el.classed("active", isActive);
-        el.classed("hovered", isHovered);
-        el.classed("neighbor", !!isNeighbor);
-
-        if (!focusId) {
-          el.classed("dim", false);
-        } else {
-          el.classed("dim", !(isFocused || isNeighbor));
-        }
+        el.classed("active", activeNodeId === d.id);
+        el.classed("hovered", hoverNodeId === d.id);
+        el.classed("neighbor", isNeighbor);
+        el.classed("dim", !!focusId && !(isFocused || isNeighbor));
 
         el.select("circle")
-          .attr("fill", getNodeBaseFill(d));
+          .attr("fill", style.fill)
+          .attr("stroke", style.stroke)
+          .attr("stroke-width", style.strokeWidth);
       });
 
       link
@@ -567,94 +775,91 @@
           return a === focusId || b === focusId;
         })
         .attr("stroke-opacity", d => {
-          if (!focusId) return 0.55;
+          if (!focusId) return 0.56;
           const a = d.source.id || d.source;
           const b = d.target.id || d.target;
           return (a === focusId || b === focusId) ? 0.95 : 0.07;
         });
-
-      if (focusId) {
-        node.each(function(d) {
-          const el = d3.select(this);
-          const circle = el.select("circle");
-          const isFocused = focusId === d.id;
-          const isNeighbor = adjacency.get(focusId).has(d.id);
-
-          if (isFocused) {
-            circle.attr("fill", "#ffffff");
-          } else if (isNeighbor) {
-            const base = getNodeBaseFill(d);
-            circle.attr("fill", brightenHex(base, 18));
-          }
-        });
-      }
-    }
-
-    function brightenHex(hex, amount) {
-      const {r, g, b} = hexToRgb(hex);
-      return rgbToHex(
-        Math.min(255, r + amount),
-        Math.min(255, g + amount),
-        Math.min(255, b + amount)
-      );
-    }
-
-    function hexToRgb(hex) {
-      const clean = hex.replace("#", "");
-      const bigint = parseInt(clean, 16);
-      return {
-        r: (bigint >> 16) & 255,
-        g: (bigint >> 8) & 255,
-        b: bigint & 255
-      };
-    }
-
-    function rgbToHex(r, g, b) {
-      return "#" + [r, g, b].map(v => v.toString(16).padStart(2, "0")).join("");
-    }
-
-    function renderPanel(nodeData, selectedId) {
-      if (!nodeData) {
-        panel.innerHTML = `
-          <h2>Keyword Atlas</h2>
-          <div class="meta">Black/white prototype. Hover or tap to preview. Click to select and pull related nodes inward.</div>
-          <div class="doc hint">
-            Visited nodes keep their own grayscale history state.<br><br>
-            Only the node you visit changes tone.<br><br>
-            When all nodes have been visited, all nodes retain distinct grayscale tones.
-          </div>
-        `;
-        return;
-      }
-
-      const connected = [...adjacency.get(nodeData.id)];
-      const highlighted = highlightTerms(nodeData.doc, nodeData.keywords);
-      const visited = !!visitedToneMap[nodeData.id];
-
-      panel.innerHTML = `
-        <h2>${nodeData.id}</h2>
-        <div class="meta">
-          group: ${nodeData.group} · keywords: ${nodeData.keywords.join(", ")}<br>
-          connected nodes: ${connected.length}${selectedId === nodeData.id ? " · selected" : ""}${visited ? " · visited" : ""}
-        </div>
-        <div class="doc">${highlighted}</div>
-      `;
     }
 
     function escapeRegExp(string) {
       return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     }
 
-    function highlightTerms(text, terms) {
-      let result = text;
-      const sorted = [...terms].sort((a, b) => b.length - a.length);
+    function escapeHtml(str) {
+      return str
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
 
-      sorted.forEach(term => {
+    function highlightTerms(text, terms) {
+      let result = escapeHtml(text);
+      const safeTerms = [...new Set(terms.filter(Boolean))].sort((a, b) => b.length - a.length);
+
+      safeTerms.forEach(term => {
         const regex = new RegExp(`\\b(${escapeRegExp(term)})\\b`, "gi");
         result = result.replace(regex, "<mark>$1</mark>");
       });
 
+      if (currentSearch) {
+        currentSearch.split(/\s+/).filter(Boolean).forEach(term => {
+          const regex = new RegExp(`(${escapeRegExp(term)})`, "gi");
+          result = result.replace(regex, "<mark>$1</mark>");
+        });
+      }
+
       return result;
+    }
+
+    function renderDefaultPanel() {
+      panelContent.innerHTML = `
+        <div class="panel-top">
+          <a class="btn" href="../index.html">Back to Cogito</a>
+        </div>
+        <h2>Keyword Atlas</h2>
+        <div class="meta">White nodes by default. Click a node to turn it black and persist it as visited. Use the search bar to jump to a matching document.</div>
+        <div class="doc hint">
+          Hover or tap to preview.<br><br>
+          Click to select and pull related nodes inward.<br><br>
+          Search checks node names, keywords, and full document text.
+        </div>
+      `;
+    }
+
+    function renderPanel(nodeData) {
+      const connected = [...adjacency.get(nodeData.id)];
+      const highlighted = highlightTerms(nodeData.doc, nodeData.keywords);
+      const visited = isVisited(nodeData.id);
+      const selected = activeNodeId === nodeData.id;
+
+      panelContent.innerHTML = `
+        <div class="panel-top">
+          <a class="btn" href="../index.html">Back to Cogito</a>
+        </div>
+        <h2>${escapeHtml(nodeData.id)}</h2>
+        <div class="meta">
+          group: ${escapeHtml(nodeData.group)} · keywords: ${nodeData.keywords.map(escapeHtml).join(", ")}<br>
+          connected nodes: ${connected.length}${selected ? " · selected" : ""}${visited ? " · visited" : ""}${currentSearch ? " · search active" : ""}
+        </div>
+        <div class="doc">${highlighted}</div>
+      `;
+    }
+
+    function centerOnNode(d) {
+      const current = d3.zoomTransform(svg.node());
+      const scale = current.k;
+      const targetX = width / 2 - d.x * scale;
+      const targetY = height / 2 - d.y * scale;
+
+      svg.transition()
+        .duration(450)
+        .call(
+          zoomBehavior.transform,
+          d3.zoomIdentity.translate(targetX, targetY).scale(scale)
+        );
     }
 
     function drag(sim) {
@@ -680,18 +885,24 @@
     }
 
     function resizeGraph() {
-      graphWidth = graphWrap.clientWidth;
-      graphHeight = graphWrap.clientHeight;
+      const size = getGraphSize();
+      width = size.width;
+      height = size.height;
+      svg.attr("viewBox", `0 0 ${width} ${height}`);
 
-      simulation.force("center", d3.forceCenter(graphWidth / 2, graphHeight / 2));
-      simulation.force("x", d3.forceX(graphWidth / 2).strength(0.015));
-      simulation.force("y", d3.forceY(graphHeight / 2).strength(0.015));
-      simulation.alpha(0.55).restart();
+      simulation.force("center", d3.forceCenter(width / 2, height / 2));
+      simulation.force("x", d3.forceX(width / 2).strength(0.015));
+      simulation.force("y", d3.forceY(height / 2).strength(0.015));
+
+      if (activeNodeId) applyActiveForces();
+      simulation.alpha(0.6).restart();
     }
 
     window.addEventListener("resize", resizeGraph);
 
+    renderDefaultPanel();
     updateStyles();
+    simulation.alpha(1).restart();
   </script>
 </body>
 </html>
