@@ -1,124 +1,299 @@
 /* style.css */
 
-/* 1) General resets and fonts */
+/* =========================
+   GLOBAL RESET + BASE
+========================= */
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
-html, body {
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+html,
+body {
   font-family: "Helvetica Neue", Arial, sans-serif;
+  min-height: 100%;
 }
 
-/* 2) Homepage (index.html) styling */
+/* =========================
+   GLOBAL TYPOGRAPHY
+========================= */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+p,
+li {
+  line-height: 1.8;
+  font-size: 1rem;
+}
+
+/* Better paragraph shape */
+p {
+  max-width: 70ch;
+  margin: 0 auto 1.5rem auto;
+}
+
+/* Lists */
+ul,
+ol {
+  margin: 1.5rem 0 1.5rem 2rem;
+}
+
+li {
+  margin-bottom: 0.75rem;
+}
+
+/* =========================
+   GLOBAL LINK/BUTTON SYSTEM
+========================= */
+
+/* ALL hyperlinks become minimal rectangular buttons */
+
+a {
+  display: inline-block;
+  text-decoration: none;
+  transition:
+    opacity 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease;
+
+  opacity: 1;
+}
+
+/* White site buttons (homepage) */
+body.homepage a {
+  color: #000;
+  border: 1px solid rgba(0,0,0,0.9);
+  background: rgba(255,255,255,0.88);
+
+  padding: 12px 18px;
+  border-radius: 2px;
+
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+/* Black site buttons (subpages) */
+body.subpage a {
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.06);
+
+  padding: 12px 18px;
+  border-radius: 2px;
+
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+/* Hover states */
+a:hover {
+  opacity: 0.65;
+}
+
+/* Click feedback */
+a:active {
+  transform: scale(0.98);
+}
+
+/* Keyboard accessibility */
+a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+/* =========================
+   HOMEPAGE
+========================= */
+
 body.homepage {
-  background-color: #fff;  /* White background */
-  color: #000;             /* Black text */
-  overflow: hidden;        /* We use a full-screen canvas for Matter.js */
+  background-color: #fff;
+  color: #000;
+  overflow: hidden;
 }
 
-/* The canvas on homepage */
+/* Matter.js canvas */
 canvas {
   display: block;
-  width: 100vw;             /* ensure canvas fills screen width */
-  height: 100vh;            /* ensure canvas fills screen height */
-  touch-action: none;       /* allow drag gestures without scrolling */
+  width: 100vw;
+  height: 100vh;
+
+  touch-action: none;
   -webkit-user-select: none;
   user-select: none;
 }
 
-/* Overlay for homepage's central title & subnav */
+/* Overlay */
 #overlay {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+
   text-align: center;
-  pointer-events: none; /* Let clicks pass through except the links below */
-  padding: 0 16px;      /* breathing room on small phones */
+  pointer-events: none;
+
+  padding: 32px;
+  width: min(92vw, 900px);
 }
 
+/* Main title */
 #overlay h1 {
-  /* Responsive title: scales between 28px and 60px */
-  font-size: clamp(28px, 8vw, 60px);
-  line-height: 1.1;
-  margin: 0;
+  font-size: clamp(32px, 8vw, 64px);
+  line-height: 1;
+  margin-bottom: 22px;
   color: #000;
 }
 
-/* Subnav links */
+/* Subnav */
 #subnav {
-  margin-top: 10px;
-}
-#subnav a {
-  margin: 0 10px;
-  font-size: clamp(16px, 3.8vw, 20px);
-  color: #000;
-  text-decoration: none;
-  pointer-events: auto; /* enable clicking on these links */
-  display: inline-flex;
-  align-items: center;
+  display: flex;
   justify-content: center;
-  min-width: 44px;       /* Apple HIG tap target size */
-  min-height: 44px;
-  padding: 6px 10px;
-  border-radius: 6px;
-}
-#subnav a:active {
-  outline: 2px solid #000;
-  outline-offset: 2px;
+  flex-wrap: wrap;
+  gap: 14px;
+
+  margin-top: 18px;
 }
 
-/* 3) Subpages styling (all category pages + project pages) */
+/* Allow clicking */
+#subnav a {
+  pointer-events: auto;
+}
+
+/* =========================
+   SUBPAGES
+========================= */
+
 body.subpage {
-  background-color: #000; /* Black background */
-  color: #fff;            /* White text */
-  padding: 20px;
-}
-
-/* Headings and layout for subpages */
-header {
-  text-align: center;
-  margin-bottom: 20px;
-}
-header h1 {
-  font-size: 32px;
-  margin-bottom: 10px;
-}
-.back-button {
+  background-color: #000;
   color: #fff;
-  text-decoration: none;
-  border: 1px solid #fff;
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-size: 14px;
-}
-.back-button:hover {
-  background-color: #444;
+
+  padding:
+    clamp(28px, 5vw, 60px)
+    clamp(20px, 6vw, 80px);
 }
 
-/* Main content area in subpages */
-main.content, section.content {
-  max-width: 800px;
+/* Header */
+header {
+  margin-bottom: 60px;
+}
+
+header h1 {
+  font-size: clamp(32px, 6vw, 58px);
+  margin-bottom: 24px;
+}
+
+/* Back button spacing */
+.back-button {
+  margin-top: 8px;
+}
+
+/* =========================
+   CONTENT LAYOUT
+========================= */
+
+main.content,
+section.content {
+  max-width: 920px;
   margin: 0 auto;
-  padding: 10px;
 }
 
-/* Simple styling for embedded audio/video/iframe */
-audio, iframe, video {
+/* Stronger paragraph rhythm */
+main.content p,
+section.content p {
+  margin-bottom: 2rem;
+}
+
+/* Headings inside content */
+main.content h2,
+section.content h2 {
+  font-size: clamp(24px, 4vw, 38px);
+  margin-top: 4rem;
+  margin-bottom: 1.25rem;
+}
+
+main.content h3,
+section.content h3 {
+  font-size: clamp(18px, 3vw, 28px);
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+/* =========================
+   MEDIA
+========================= */
+
+audio,
+video,
+iframe,
+img {
   display: block;
-  margin: 20px auto;
   max-width: 100%;
-  outline: none;
+  margin: 2.5rem auto;
 }
 
-/* Utility for spacing, bullet lists, etc. */
-ul {
-  list-style: disc;
-  margin-left: 40px;
-  margin-top: 10px;
+/* Optional framed media look */
+img,
+video,
+iframe {
+  border: 1px solid rgba(255,255,255,0.15);
 }
-p, li {
-  line-height: 1.5em;
-  margin: 10px 0;
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 700px) {
+
+  body.subpage {
+    padding:
+      24px
+      18px;
+  }
+
+  #overlay {
+    width: 94vw;
+    padding: 20px;
+  }
+
+  #subnav {
+    gap: 10px;
+  }
+
+  a {
+    width: auto;
+    max-width: 100%;
+  }
+
+  body.homepage a,
+  body.subpage a {
+    padding: 11px 14px;
+    font-size: 0.92rem;
+  }
+
+  p,
+  li {
+    font-size: 0.98rem;
+    line-height: 1.75;
+  }
 }
