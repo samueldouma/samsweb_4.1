@@ -1,0 +1,101 @@
+/* Ball/Connectome control. It is outside #overlay so transformed homepage content cannot move it. */
+.home-view-control {
+  position: fixed;
+  z-index: 1000;
+  top: max(12px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100vw - 20px);
+  color: #000;
+  font-family: "Karla", "Helvetica Neue", Arial, sans-serif;
+  text-align: center;
+  pointer-events: auto;
+}
+.home-view-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.home-view-label {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+.view-arrow {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 15px;
+  flex: 0 0 30px;
+  color: #000;
+  opacity: .85;
+  transition: color 70ms linear, opacity 70ms linear;
+}
+.view-arrow::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  width: 27px;
+  height: 2px;
+  background: currentColor;
+}
+.view-arrow::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+}
+/* Left-side arrow points right, into the label. */
+.view-arrow-inward-left::before { left: 0; }
+.view-arrow-inward-left::after { right: 0; transform: rotate(45deg); }
+/* Right-side arrow points left, into the label. */
+.view-arrow-inward-right::before { right: 0; }
+.view-arrow-inward-right::after { left: 0; transform: rotate(-135deg); }
+.home-view-toggle {
+  position: relative;
+  width: 54px;
+  height: 29px;
+  display: block;
+  margin: 8px auto 0;
+  padding: 0;
+  border: 1.5px solid #000;
+  border-radius: 999px;
+  background: #fff;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  box-shadow: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.home-view-toggle:focus,
+.home-view-toggle:active,
+.home-view-toggle:focus-visible { outline: none; box-shadow: none; }
+.home-view-toggle span {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  background: #000;
+}
+@media (max-width: 700px) {
+  .home-view-control { top: max(10px, env(safe-area-inset-top)); }
+  .home-view-label-row { gap: 6px; }
+  .home-view-label { font-size: 11px; }
+  .view-arrow { width: 24px; flex-basis: 24px; }
+  .view-arrow::before { width: 22px; }
+  .home-view-toggle { width: 52px; height: 28px; margin-top: 7px; }
+  .home-view-toggle span { width: 20px; height: 20px; }
+}
+@media (max-height: 430px) {
+  .home-view-control { top: max(6px, env(safe-area-inset-top)); }
+  .home-view-toggle { margin-top: 5px; }
+}

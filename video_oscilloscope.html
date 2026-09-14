@@ -2,23 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="">
+  <meta name="keywords" content="Oscilloscope, video">
   <title>Oscilloscope</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="project-editing.css">
+  <link rel="stylesheet" href="page-navigation.css">
+  <link rel="stylesheet" href="media-embed-page.css">
+  <script src="page-navigation.js" defer></script>
 </head>
-<body class="subpage">
+<body class="subpage media-embed-page">
   <header>
     <h1>Oscilloscope</h1>
     <a href="video.html" class="back-button">Back</a>
   </header>
   <main class="content">
-    <p>Embedded YouTube video:</p>
-    <iframe 
-      width="560" 
-      height="315" 
-      src="https://www.youtube.com/embed/DKgfbVrb2w8" 
-      frameborder="0"
+    <iframe
+      src="https://www.youtube.com/embed/DKgfbVrb2w8"
+      title="Oscilloscope"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
       allowfullscreen>
     </iframe>
+    <section class="project-introduction"><!-- ADD OPTIONAL VISIBLE PROJECT INTRODUCTION HERE. EDIT meta[name="keywords"] FOR INVISIBLE SEARCH TERMS. --></section>
   </main>
 </body>
 </html>

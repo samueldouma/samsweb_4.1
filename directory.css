@@ -1,0 +1,50 @@
+:root { --ink:#090909; --paper:#f7f7f4; --line:#111; }
+* { box-sizing:border-box; }
+html,body { margin:0; min-height:100%; background:var(--paper); color:var(--ink); font-family:"Karla",Arial,sans-serif; }
+button,input,a { font:inherit; }
+.directory-header {
+  position:sticky; top:0; z-index:10;
+  display:grid; grid-template-columns:48px minmax(0,1fr) minmax(130px,30vw);
+  align-items:center; gap:12px;
+  min-height:64px; padding:10px 22px;
+  background:rgba(247,247,244,.97); border-bottom:1px solid var(--line);
+}
+.directory-header h1 { margin:0; font-size:clamp(24px,4vw,40px); font-weight:600; letter-spacing:-.035em; }
+.directory-back {
+  width:42px; height:42px; display:flex; align-items:center; justify-content:flex-start;
+  padding:0; border:0; border-radius:0; background:transparent; color:var(--ink);
+  box-shadow:none; outline:none; font:300 36px/1 "Helvetica Neue",Arial,sans-serif;
+  cursor:pointer; -webkit-tap-highlight-color:transparent;
+}
+.directory-back:hover { opacity:.58; }
+.directory-back:focus,.directory-back:focus-visible { outline:none; box-shadow:none; }
+#directorySearch { width:100%; height:40px; border:1px solid var(--ink); border-radius:0; background:transparent; padding:0 10px; outline:none; }
+.directory-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); margin:16px; border-left:1px solid var(--line); }
+.directory-section { min-width:0; border-top:1px solid var(--line); border-right:1px solid var(--line); border-bottom:1px solid var(--line); }
+.directory-section h2 { margin:0; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:0; border-bottom:1px solid var(--line); font-size:14px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; }
+.directory-section h2 > a { flex:1; display:block; padding:14px; color:var(--ink); text-decoration:none; }
+.directory-section h2 > a:hover,.directory-section h2 > a:focus-visible { background:var(--ink); color:var(--paper); outline:none; }
+.directory-heading-static { padding:14px !important; }
+.directory-heading-lock { padding-right:12px; font-size:9px; letter-spacing:.11em; }
+.directory-item { min-height:50px; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border-bottom:1px solid #b9b9b4; color:var(--ink); text-decoration:none; }
+.directory-item:last-child { border-bottom:0; }
+.directory-item:hover,.directory-item:focus-visible { background:var(--ink); color:var(--paper); outline:none; }
+.directory-lock { flex:0 0 auto; font-size:9px; font-weight:700; letter-spacing:.11em; }
+.directory-section[hidden],.directory-item[hidden] { display:none!important; }
+.visually-hidden { position:absolute!important; width:1px!important; height:1px!important; padding:0!important; margin:-1px!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; border:0!important; }
+@media(max-width:900px){ .directory-grid{grid-template-columns:repeat(2,minmax(0,1fr));} }
+@media(max-width:620px){
+  .directory-header { grid-template-columns:42px minmax(0,1fr); padding:8px 16px; }
+  .directory-header h1 { font-size:26px; }
+  #directorySearch { grid-column:1/-1; height:44px; }
+  .directory-grid { grid-template-columns:1fr; margin:10px; }
+  .directory-section h2 > a,.directory-heading-static { padding:15px 12px !important; }
+  .directory-item { min-height:56px; padding:15px 12px; }
+}
+/* 6.4: replace the glyph with a straight-line arrow and retain edge padding. */
+.directory-back { position:relative; font-size:0; margin-left:4px; }
+.directory-back > span { position:absolute; left:3px; top:20px; width:34px; height:2px; background:currentColor; }
+.directory-back > span::before,
+.directory-back > span::after { content:""; position:absolute; left:0; width:13px; height:2px; background:currentColor; transform-origin:left center; }
+.directory-back > span::before { transform:rotate(45deg); }
+.directory-back > span::after { transform:rotate(-45deg); }

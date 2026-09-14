@@ -1,0 +1,27 @@
+samsweb_6.1 rebuild
+
+Preserved:
+- Ball-view Matter.js movement, drag behavior, restitution, friction, sizes, boundaries, labels, click navigation, and persistent visited-color assignment.
+- Hybrid connectome simulation forces and draggable desktop/mobile document divider.
+- Static Directory as a separate page reachable from the homepage.
+- Access code 2003! on the previously specified locked pages.
+
+Deliberate changes in this rebuild:
+- Removed all collision-driven ball color inversion. Balls start white; only clicked/history colors persist on return.
+- Restored and enlarged Ball/Connectome toggle; three arrows change random rainbow colors about 1.5 times per second.
+- Kept the hybrid toggle horizontally centered so it is easy to find after switching views.
+- Standardized HTML back controls as an unboxed line arrow in document flow; history.back() returns to Directory when that was the prior page.
+- CV, Longplayer, Rotliography, Gesso, Gucci document, Audio Ergo Sum, and other pure intermediary pages now open their final destination directly.
+- Removed the Dico source-document link.
+- Directory category titles link to their category pages; duplicate category entries were removed.
+- Directory project links open full/direct project pages, never the hybrid viewer.
+
+
+samsweb_6.3 changes:
+- Fixed top Ball/Connectome control with separated straight-line rainbow arrows.
+- Repaired desktop/mobile hybrid divider with pointer capture and an iframe drag shield.
+- Removed the graph instruction line.
+- Expanded the website archive YouTube embed to fill the available page.
+- Added history-aware back arrows to access-code screens.
+- Blocked Cat a logue.
+- Increased back-arrow edge padding.

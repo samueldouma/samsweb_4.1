@@ -5,21 +5,38 @@
   <title>Samuel Douma - Interactive Directory</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="home-controls.css">
   <!-- Matter.js from CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 </head>
 <body class="homepage">
   <canvas id="canvas"></canvas>
 
+  <div class="home-view-control" aria-label="Switch between Ball View and Connectome View">
+    <div class="home-view-label-row">
+      <span class="view-arrow home-view-arrow view-arrow-inward-left" aria-hidden="true"></span>
+      <span class="home-view-label">Ball View / Connectome View</span>
+      <span class="view-arrow home-view-arrow view-arrow-inward-right" aria-hidden="true"></span>
+    </div>
+    <button id="connectomeToggle" class="home-view-toggle" type="button" role="switch" aria-checked="false" aria-label="Open Connectome View">
+      <span aria-hidden="true"></span>
+    </button>
+  </div>
+
   <div id="overlay">
     <h1>Samuel Douma</h1>
     <div id="subnav">
-      <a href="cv.html">CV</a>
+      <a href="SAMUELDOUMA_RESUME2025.pdf">CV</a>
       <a href="contact.html">Contact</a>
       <a href="about.html">About</a>
+      <a href="directory.html">Directory</a>
     </div>
   </div>
 
   <script src="script.js"></script>
+  <script src="home-controls.js"></script>
 </body>
 </html>

@@ -2,34 +2,43 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="">
+  <meta name="keywords" content="Long Form Audio Meditations, sound meditation">
   <title>Long Form Audio Meditations</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="project-editing.css">
+  <link rel="stylesheet" href="page-navigation.css">
+  <link rel="stylesheet" href="media-embed-page.css">
+  <script src="page-navigation.js" defer></script>
 </head>
-<body class="subpage">
+<body class="subpage media-stack-page">
   <header>
     <h1>Long Form Audio Meditations</h1>
     <a href="audio.html" class="back-button">Back</a>
   </header>
   <main class="content">
-    <h2>Sound meditation part 1#03 mergedsoundmeditationharshsick.wav</h2>
-    <audio controls src="assets/audio/Sound meditation part 1#03 mergedsoundmeditationharshsick.wav">
-      Your browser does not support the audio element.
-    </audio>
-
-    <h2>Record #05</h2>
-    <p>Video with audio (embedded YouTube):</p>
-    <iframe 
-      width="560" 
-      height="315" 
-      src="https://www.youtube.com/embed/L7qDzvHuyb0" 
-      frameborder="0" 
-      allowfullscreen>
-    </iframe>
-
-    <h2>Palm_Reading_Brighton_beach.wav</h2>
-    <audio controls src="assets/audio/Palm_Reading_Brighton_beach.wav">
-      Your browser does not support the audio element.
-    </audio>
+    <section class="media-panel">
+      <div class="media-panel-inner">
+        <h2>Sound Meditation 1</h2>
+        <audio controls preload="metadata" src="assets/audio/Sound meditation part 1#03 mergedsoundmeditationharshsick.wav"></audio>
+      </div>
+    </section>
+    <section class="media-panel media-panel-video">
+      <iframe
+        src="https://www.youtube.com/embed/L7qDzvHuyb0"
+        title="Record 05"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen>
+      </iframe>
+    </section>
+    <section class="media-panel">
+      <div class="media-panel-inner">
+        <h2>Palm Reading, Brighton Beach</h2>
+        <audio controls preload="metadata" src="assets/audio/Palm_Reading_Brighton_beach.wav"></audio>
+      </div>
+    </section>
+    <section class="project-introduction"><!-- ADD OPTIONAL VISIBLE PROJECT INTRODUCTION HERE. EDIT meta[name="keywords"] FOR INVISIBLE SEARCH TERMS. --></section>
   </main>
 </body>
 </html>

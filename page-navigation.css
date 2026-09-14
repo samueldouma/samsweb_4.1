@@ -1,0 +1,62 @@
+body a.page-history-back,
+body button.page-history-back {
+  position: relative!important;
+  display: inline-block!important;
+  width: 54px!important;
+  height: 42px!important;
+  margin: 0 0 18px 10px!important;
+  padding: 0!important;
+  border: 0!important;
+  border-radius: 0!important;
+  background: transparent!important;
+  color: #fff!important;
+  box-shadow: none!important;
+  text-decoration: none!important;
+  font: inherit!important;
+  transform: none!important;
+  cursor: pointer;
+  mix-blend-mode: difference;
+  -webkit-tap-highlight-color: transparent;
+}
+body .page-history-back > span {
+  position: absolute;
+  left: 4px;
+  top: 20px;
+  width: 36px;
+  height: 2px;
+  background: currentColor;
+}
+body .page-history-back > span::before,
+body .page-history-back > span::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 13px;
+  height: 2px;
+  background: currentColor;
+  transform-origin: left center;
+}
+body .page-history-back > span::before { transform: rotate(45deg); }
+body .page-history-back > span::after { transform: rotate(-45deg); }
+body a.page-history-back:hover,
+body button.page-history-back:hover { opacity: .58; }
+body a.page-history-back:focus,
+body button.page-history-back:focus,
+body a.page-history-back:focus-visible,
+body button.page-history-back:focus-visible { outline: none!important; box-shadow: none!important; }
+@media (max-width:700px) {
+  body a.page-history-back,
+  body button.page-history-back {
+    width: 50px!important;
+    height: 40px!important;
+    margin: 0 0 14px 8px!important;
+  }
+}
+body a.page-history-back.page-history-back-fixed,
+body button.page-history-back.page-history-back-fixed {
+  position: fixed!important;
+  top: max(14px, env(safe-area-inset-top))!important;
+  left: max(20px, env(safe-area-inset-left))!important;
+  z-index: 2147483000!important;
+  margin: 0!important;
+}

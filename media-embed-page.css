@@ -1,0 +1,143 @@
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+}
+
+body.subpage.media-embed-page,
+body.subpage.media-stack-page {
+  margin: 0;
+  padding: 0;
+  background: #000;
+  color: #fff;
+}
+
+body.media-embed-page {
+  width: 100vw;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+body.media-embed-page > header,
+body.media-stack-page > header {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+body.media-embed-page main.content {
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body.media-embed-page main.content > iframe,
+body.media-embed-page main.content > video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  margin: 0;
+  border: 0;
+  background: #000;
+}
+
+body.media-embed-page .project-introduction:empty,
+body.media-stack-page .project-introduction:empty {
+  display: none;
+}
+
+body.media-stack-page {
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+body.media-stack-page main.content {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+.media-panel {
+  position: relative;
+  width: 100%;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding:
+    max(80px, calc(env(safe-area-inset-top) + 70px))
+    clamp(18px, 4vw, 60px)
+    max(42px, env(safe-area-inset-bottom));
+  border-bottom: 1px solid rgba(255,255,255,.75);
+  background: #000;
+}
+
+.media-panel:last-child {
+  border-bottom: 0;
+}
+
+.media-panel-inner {
+  width: min(1100px, 100%);
+  display: grid;
+  gap: clamp(22px, 4vw, 52px);
+}
+
+.media-panel h2 {
+  margin: 0;
+  font-size: clamp(34px, 7vw, 92px);
+  line-height: .95;
+  letter-spacing: -.05em;
+}
+
+.media-panel audio {
+  display: block;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.media-panel.media-panel-video {
+  padding: 0;
+}
+
+.media-panel.media-panel-video iframe,
+.media-panel.media-panel-video video {
+  width: 100%;
+  height: 100dvh;
+  max-width: none;
+  margin: 0;
+  border: 0;
+  background: #000;
+}
+
+@media (max-width: 700px) {
+  body.media-embed-page main.content,
+  body.media-embed-page main.content > iframe,
+  body.media-embed-page main.content > video {
+    width: 100vw;
+    height: 100svh;
+    min-height: 100svh;
+  }
+
+  .media-panel {
+    min-height: 100svh;
+    padding:
+      max(74px, calc(env(safe-area-inset-top) + 64px))
+      16px
+      max(30px, env(safe-area-inset-bottom));
+  }
+
+  .media-panel.media-panel-video iframe,
+  .media-panel.media-panel-video video {
+    height: 100svh;
+  }
+}

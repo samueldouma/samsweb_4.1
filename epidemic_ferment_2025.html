@@ -20,14 +20,15 @@
     body {
       background: var(--bg);
       color: var(--fg);
-      font-family: "Apple Garamond", Garamond, "Times New Roman", serif;
+      font-family: "Helvetica Neue", Arial, sans-serif;
       font-weight: 400;
       margin: 0;
       line-height: 1.65;
     }
 
     /* ensure nothing renders bold */
-    b, strong, h1, h2, h3, h4, h5, h6 { font-weight: 400; }
+    b, strong { font-weight: 600; }
+    h1, h2, h3, h4, h5, h6 { font-weight: 500; }
 
     .wrap {
       padding: clamp(16px, 4vw, 44px);
@@ -146,6 +147,11 @@
       }
     }
   </style>
+  <meta name="description" content="">
+  <meta name="keywords" content="Epidemic Ferment, publication">
+  <link rel="stylesheet" href="project-editing.css">
+  <link rel="stylesheet" href="page-navigation.css">
+  <script src="page-navigation.js" defer></script>
 </head>
 
 <body>
@@ -198,7 +204,9 @@
         </div>
       </section>
 
-    </main>
+    
+  <section class="project-introduction"><!-- ADD OPTIONAL VISIBLE PROJECT INTRODUCTION HERE. EDIT meta[name="keywords"] FOR INVISIBLE SEARCH TERMS. --></section>
+</main>
   </div>
 </body>
 </html>

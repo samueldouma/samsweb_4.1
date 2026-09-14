@@ -1,21 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="access-pending" lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="">
+  <meta name="keywords" content="Hammock Album, WAV, audio">
   <title>Hammock Album</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="project-editing.css">
+  <link rel="stylesheet" href="page-navigation.css">
+  <link rel="stylesheet" href="media-embed-page.css">
+  <link rel="stylesheet" href="access-gate.css">
+  <script src="page-navigation.js" defer></script>
+  <script src="access-gate.js" defer></script>
 </head>
-<body class="subpage">
+<body class="subpage media-stack-page">
   <header>
     <h1>Hammock Album</h1>
     <a href="audio.html" class="back-button">Back</a>
   </header>
   <main class="content">
-    <p>A series of WAV recordings:</p>
-    <audio controls src="assets/audio/ZOOM0001.WAV"></audio>
-    <audio controls src="assets/audio/ZOOM0002.WAV"></audio>
-    <audio controls src="assets/audio/ZOOM0003.WAV"></audio>
-    <!-- etc. -->
+    <section class="media-panel">
+      <div class="media-panel-inner">
+        <h2>ZOOM0001</h2>
+        <audio controls preload="metadata" src="assets/audio/ZOOM0001.WAV"></audio>
+      </div>
+    </section>
+    <section class="media-panel">
+      <div class="media-panel-inner">
+        <h2>ZOOM0002</h2>
+        <audio controls preload="metadata" src="assets/audio/ZOOM0002.WAV"></audio>
+      </div>
+    </section>
+    <section class="media-panel">
+      <div class="media-panel-inner">
+        <h2>ZOOM0003</h2>
+        <audio controls preload="metadata" src="assets/audio/ZOOM0003.WAV"></audio>
+      </div>
+    </section>
+    <section class="project-introduction"><!-- ADD OPTIONAL VISIBLE PROJECT INTRODUCTION HERE. EDIT meta[name="keywords"] FOR INVISIBLE SEARCH TERMS. --></section>
   </main>
 </body>
 </html>
